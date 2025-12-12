@@ -10,7 +10,7 @@
 const http = require("http");
 const path = require("path");
 const fs = require("fs");
-const sweph = require("swisseph");
+const sweph = require("sweph");
 
 const PORT = Number(process.env.ASTRO_ENGINE_PORT || 5005);
 const EPHE_PATH =
