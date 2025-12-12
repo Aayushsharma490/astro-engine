@@ -8,7 +8,7 @@
         "build": "if [ ! -d 'swisseph-master' ]; then git clone https://github.com/aloistr/swisseph.git swisseph-master; fi"
     },
     "dependencies": {
-        "swisseph": "^2.10.3"
+        "sweph": "^2.10.3"
     },
     "engines": {
         "node": ">=14.0.0"
