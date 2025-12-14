@@ -496,11 +496,36 @@ function calculateVimshottari(moonDegree, birthUtcDate) {
     const endDate = new Date(
       startDate.getTime() + spanYears * 365.2425 * 24 * 3600 * 1000
     );
+
+    // Calculate Antardashas (Sub-periods)
+    const antardashas = [];
+    let adCursor = new Date(startDate);
+    const mahadashaLordIndex = vimshottariSequence.indexOf(lord);
+
+    for (let j = 0; j < 9; j++) {
+      const adLord = vimshottariSequence[(mahadashaLordIndex + j) % 9];
+      const adDurationYears = (durations[lord] * durations[adLord]) / 120;
+
+      const adEndDate = new Date(
+        adCursor.getTime() + adDurationYears * 365.2425 * 24 * 3600 * 1000
+      );
+
+      antardashas.push({
+        planet: adLord,
+        startDate: adCursor.toISOString().split("T")[0],
+        endDate: adEndDate.toISOString().split("T")[0],
+        years: Number(adDurationYears.toFixed(4))
+      });
+
+      adCursor = adEndDate;
+    }
+
     dashas.push({
       planet: lord,
       startDate: startDate.toISOString().split("T")[0],
       endDate: endDate.toISOString().split("T")[0],
       years: Number(spanYears.toFixed(2)),
+      antardashas: antardashas
     });
     cursor = endDate;
     currentIndex += 1;
