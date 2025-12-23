@@ -838,15 +838,17 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // WhatsApp Status Endpoint
-  if (req.method === "GET" && req.url === "/whatsapp/status") {
+  // Health Check Endpoint (for pre-warming/cold-starts)
+  if (req.method === "GET" && req.url === "/health") {
     respondJson(res, 200, {
-      status: connectionStatus,
-      qr: currentQR,
-      connected: connectionStatus === "CONNECTED",
+      status: "ok",
+      engine: "astro-engine",
+      timestamp: new Date().toISOString()
     });
     return;
   }
+
+  // WhatsApp Status Endpoint
 
   // WhatsApp Send Message Endpoint
   if (req.method === "POST" && req.url === "/whatsapp/send") {
