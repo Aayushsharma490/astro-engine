@@ -490,48 +490,58 @@ function calculateVimshottari(moonDegree, birthUtcDate) {
   let currentIndex = startIndex;
   let spanYears = remainingYears;
 
+  console.log(`[astro-engine] Starting loop for 12 mahadashas. remainingYears: ${remainingYears}`);
+
   for (let i = 0; i < 12; i += 1) {
-    const lord = vimshottariSequence[currentIndex % vimshottariSequence.length];
-    const startDate = new Date(cursor);
-    const endDate = new Date(
-      startDate.getTime() + spanYears * 365.2425 * 24 * 3600 * 1000
-    );
-
-    // Calculate Antardashas (Sub-periods)
-    const antardashas = [];
-    let adCursor = new Date(startDate);
-    const mahadashaLordIndex = vimshottariSequence.indexOf(lord);
-
-    for (let j = 0; j < 9; j++) {
-      const adLord = vimshottariSequence[(mahadashaLordIndex + j) % 9];
-      const adDurationYears = (durations[lord] * durations[adLord]) / 120;
-
-      const adEndDate = new Date(
-        adCursor.getTime() + adDurationYears * 365.2425 * 24 * 3600 * 1000
+    try {
+      const lord = vimshottariSequence[currentIndex % vimshottariSequence.length];
+      const startDate = new Date(cursor);
+      const endDate = new Date(
+        startDate.getTime() + spanYears * 365.2425 * 24 * 3600 * 1000
       );
 
-      antardashas.push({
-        planet: adLord,
-        startDate: adCursor.toISOString().split("T")[0],
-        endDate: adEndDate.toISOString().split("T")[0],
-        years: Number(adDurationYears.toFixed(4))
+      // Calculate Antardashas (Sub-periods)
+      const antardashas = [];
+      let adCursor = new Date(startDate);
+      const mahadashaLordIndex = vimshottariSequence.indexOf(lord);
+
+      for (let j = 0; j < 9; j++) {
+        const adLord = vimshottariSequence[(mahadashaLordIndex + j) % 9];
+        const adDurationYears = (durations[lord] * durations[adLord]) / 120;
+
+        const adEndDate = new Date(
+          adCursor.getTime() + adDurationYears * 365.2425 * 24 * 3600 * 1000
+        );
+
+        antardashas.push({
+          planet: adLord,
+          startDate: adCursor.toISOString().split("T")[0],
+          endDate: adEndDate.toISOString().split("T")[0],
+          years: Number(adDurationYears.toFixed(4))
+        });
+
+        adCursor = adEndDate;
+      }
+
+      dashas.push({
+        planet: lord,
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+        years: Number(spanYears.toFixed(2)),
+        antardashas: antardashas
       });
-
-      adCursor = adEndDate;
+      cursor = endDate;
+      currentIndex += 1;
+      spanYears =
+        durations[vimshottariSequence[currentIndex % vimshottariSequence.length]];
+    } catch (e) {
+      console.error(`[astro-engine] Error calculating mahadasha ${i}:`, e);
+      // Don't break the whole process if one dasha fails (though it shouldn't)
+      break;
     }
-
-    dashas.push({
-      planet: lord,
-      startDate: startDate.toISOString().split("T")[0],
-      endDate: endDate.toISOString().split("T")[0],
-      years: Number(spanYears.toFixed(2)),
-      antardashas: antardashas
-    });
-    cursor = endDate;
-    currentIndex += 1;
-    spanYears =
-      durations[vimshottariSequence[currentIndex % vimshottariSequence.length]];
   }
+
+  console.log(`[astro-engine] Calculated ${dashas.length} mahadashas.`);
 
   return {
     current: dashas[0],
