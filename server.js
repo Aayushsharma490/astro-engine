@@ -1090,6 +1090,14 @@ const server = http.createServer(async (req, res) => {
   }
 
   // WhatsApp Status Endpoint
+  if (req.method === "GET" && req.url === "/whatsapp/status") {
+    respondJson(res, 200, {
+      status: connectionStatus,
+      qr: currentQR,
+      connected: connectionStatus === "CONNECTED",
+    });
+    return;
+  }
 
   // WhatsApp Send Message Endpoint
   if (req.method === "POST" && req.url === "/whatsapp/send") {
@@ -1271,4 +1279,5 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
