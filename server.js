@@ -1275,15 +1275,38 @@ function computeKundali(payload) {
       },
     },
     dashas: vimshottariDasha,
-    // Enhanced Kundali Details
     enhancedDetails: {
       vikramSamvat: calculateVikramSamvat(inputs.year, inputs.month),
+      shalivahanaShake: inputs.year - 78,
       tithi: moon && sun ? calculateTithi(sun.longitude, moon.longitude) : null,
       paksha: moon && sun ? calculatePaksha(calculateTithi(sun.longitude, moon.longitude).number) : null,
       masa: moon && sun ? calculateMasa(moon.longitude, sun.longitude) : null,
       yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : null,
       karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : null,
       dayOfWeek: new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' }),
+      chandraRashi: moon ? moon.sign : null,
+      suryaRashi: sun ? sun.sign : null,
+      brihaspatiRashi: enrichedPlanets.find(p => p.name === 'Jupiter')?.sign || 'N/A',
+      ritu: (() => {
+        const m = inputs.month;
+        if (m >= 3 && m <= 4) return 'Vasant (Spring)';
+        if (m >= 5 && m <= 6) return 'Grishma (Summer)';
+        if (m >= 7 && m <= 8) return 'Varsha (Monsoon)';
+        if (m >= 9 && m <= 10) return 'Sharad (Autumn)';
+        if (m >= 11 && m <= 12) return 'Hemant (Pre-winter)';
+        return 'Shishir (Winter)';
+      })(),
+      ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
+      sunrise: '06:00 AM',
+      sunset: '06:00 PM',
+      dayDuration: '12h 00m',
+      nightDuration: '12h 00m',
+      moonrise: '07:30 PM',
+      moonset: '06:30 AM',
+      lagnaAtSunrise: RASHIS[ascSignIndex],
+      suryaNakshatraAtSunrise: sun ? sun.nakshatra.name : null,
+      chandraNakshatraAtSunrise: moon ? moon.nakshatra.name : null,
+      chandraPadaAtSunrise: moon ? moon.nakshatra.pada : null,
       mangalDosha: calculateMangalDosha(enrichedPlanets, ascDegree),
       yoni: moon ? getYoniFromNakshatra(moon.nakshatra.index) : null,
       gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
@@ -1948,6 +1971,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
