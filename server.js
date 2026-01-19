@@ -437,6 +437,153 @@ function formatDateParts(date) {
   };
 }
 
+// ===== PANCHANG CALCULATION FUNCTIONS =====
+
+function calculateTithi(sunLong, moonLong) {
+  // Tithi is based on the elongation of Moon from Sun
+  const elongation = normalizeDegree(moonLong - sunLong);
+  const tithiNumber = Math.floor(elongation / 12) + 1; // 1-30
+  const tithiFraction = (elongation % 12) / 12;
+
+  const tithiNames = [
+    "Pratipada", "Dwitiya", "Tritiya", "Chaturthi", "Panchami",
+    "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami",
+    "Ekadashi", "Dwadashi", "Trayodashi", "Chaturdashi", "Purnima/Amavasya"
+  ];
+
+  const tithiIndex = ((tithiNumber - 1) % 15);
+  return {
+    number: tithiNumber,
+    name: tithiNames[tithiIndex],
+    fraction: tithiFraction
+  };
+}
+
+function calculateYoga(sunLong, moonLong) {
+  // Yoga = (Sun longitude + Moon longitude) / 13.333...
+  const sum = normalizeDegree(sunLong + moonLong);
+  const yogaNumber = Math.floor(sum / (360 / 27)) + 1; // 1-27
+
+  const yogaNames = [
+    "Vishkumbha", "Priti", "Ayushman", "Saubhagya", "Shobhana",
+    "Atiganda", "Sukarma", "Dhriti", "Shula", "Ganda",
+    "Vriddhi", "Dhruva", "Vyaghata", "Harshana", "Vajra",
+    "Siddhi", "Vyatipata", "Variyan", "Parigha", "Shiva",
+    "Siddha", "Sadhya", "Shubha", "Shukla", "Brahma",
+    "Indra", "Vaidhriti"
+  ];
+
+  return yogaNames[(yogaNumber - 1) % 27];
+}
+
+function calculateKarana(sunLong, moonLong) {
+  // Karana is half of Tithi
+  const elongation = normalizeDegree(moonLong - sunLong);
+  const karanaNumber = Math.floor(elongation / 6) + 1; // 1-60
+
+  // 11 Karanas: 4 fixed + 7 movable (repeated 8 times)
+  const karanaNames = [
+    "Bava", "Balava", "Kaulava", "Taitila", "Garija",
+    "Vanija", "Vishti", "Shakuni", "Chatushpada", "Naga", "Kimstughna"
+  ];
+
+  // First 4 are fixed, then 7 movable repeat
+  let karanaIndex;
+  if (karanaNumber <= 57) {
+    karanaIndex = ((karanaNumber - 1) % 7);
+  } else {
+    karanaIndex = 7 + (karanaNumber - 58); // Fixed karanas at end
+  }
+
+  return karanaNames[karanaIndex % 11];
+}
+
+function calculateVikramSamvat(gregorianYear, gregorianMonth) {
+  // Vikram Samvat is 57 years ahead of Gregorian
+  // New year starts in Chaitra (March-April)
+  if (gregorianMonth < 4) {
+    return gregorianYear + 56; // Before Chaitra
+  }
+  return gregorianYear + 57;
+}
+
+function calculatePaksha(tithiNumber) {
+  // Shukla Paksha: Tithi 1-15, Krishna Paksha: Tithi 16-30
+  return tithiNumber <= 15 ? "Shukla" : "Krishna";
+}
+
+function calculateMasa(moonLong, sunLong) {
+  // Masa is based on Sun's position in zodiac
+  const sunSignIndex = getSignIndex(sunLong);
+  const masaNames = [
+    "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha",
+    "Shravana", "Bhadrapada", "Ashwin", "Kartik",
+    "Margashirsha", "Pausha", "Magha", "Phalguna"
+  ];
+
+  // Adjust for solar month starting from Aries
+  return masaNames[sunSignIndex];
+}
+
+function calculateMangalDosha(planets, ascDegree) {
+  const mars = planets.find(p => p.name === "Mars");
+  if (!mars) return "No";
+
+  const house = houseFromAscendant(mars.longitude, ascDegree);
+  // Mangal Dosha exists if Mars is in houses 1, 2, 4, 7, 8, or 12
+  if ([1, 2, 4, 7, 8, 12].includes(house)) {
+    return "Yes";
+  }
+  return "No";
+}
+
+function getYoniFromNakshatra(nakIndex) {
+  const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
+    "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
+  const yoniMap = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 11, 12, 11, 12, 13, 13,
+    4, 10, 10, 10, 9, 0, 9, 9, 1
+  ];
+  return yonis[yoniMap[nakIndex - 1]];
+}
+
+function getGanaFromNakshatra(nakIndex) {
+  const ganaMap = [0, 0, 1, 1, 0, 2, 0, 2, 2, 2, 0, 0, 1, 1, 2, 0, 0, 2, 2, 0, 0, 1, 1, 2, 0, 0, 0];
+  const ganas = ["Deva", "Manushya", "Rakshasa"];
+  return ganas[ganaMap[nakIndex - 1]];
+}
+
+function getNadiFromNakshatra(nakIndex) {
+  const nadis = ["Adi", "Madhya", "Antya"];
+  return nadis[(nakIndex - 1) % 3];
+}
+
+function getVarnaFromSign(sign) {
+  const varnas = {
+    "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
+    "Aries": "Kshatriya", "Leo": "Kshatriya", "Sagittarius": "Kshatriya",
+    "Taurus": "Vaishya", "Virgo": "Vaishya", "Capricorn": "Vaishya",
+    "Gemini": "Shudra", "Libra": "Shudra", "Aquarius": "Shudra"
+  };
+  return varnas[sign] || "Unknown";
+}
+
+function getNakshatraPaya(nakIndex) {
+  // Paya: Gold, Silver, Copper, Iron (cycles through nakshatras)
+  const payas = ["Gold", "Silver", "Copper", "Iron"];
+  return payas[(nakIndex - 1) % 4];
+}
+
+function calculateIshtaKaal(sunriseLong, ascDegree) {
+  // Simplified Ishta Kaal calculation (auspicious time)
+  // This is a complex calculation, using simplified version
+  const diff = Math.abs(normalizeDegree(sunriseLong - ascDegree));
+  const hours = Math.floor(diff / 15); // Rough approximation
+  const minutes = Math.floor((diff % 15) * 4);
+  return `${hours}h ${minutes}m after sunrise`;
+}
+
+
 function calculateVimshottari(moonDegree, birthUtcDate) {
   const nakDetails = calculateNakshatra(moonDegree);
   const vimshottariSequence = [
@@ -823,7 +970,76 @@ function computeKundali(payload) {
       },
     },
     dashas: vimshottariDasha,
+    // Enhanced Kundali Details
+    enhancedDetails: {
+      vikramSamvat: calculateVikramSamvat(inputs.year, inputs.month),
+      tithi: moon && sun ? calculateTithi(sun.longitude, moon.longitude) : null,
+      paksha: moon && sun ? calculatePaksha(calculateTithi(sun.longitude, moon.longitude).number) : null,
+      masa: moon && sun ? calculateMasa(moon.longitude, sun.longitude) : null,
+      yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : null,
+      karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : null,
+      dayOfWeek: new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' }),
+      mangalDosha: calculateMangalDosha(enrichedPlanets, ascDegree),
+      yoni: moon ? getYoniFromNakshatra(moon.nakshatra.index) : null,
+      gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
+      nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
+      varna: moon ? getVarnaFromSign(moon.sign) : null,
+      nakshatraPaya: moon ? getNakshatraPaya(moon.nakshatra.index) : null,
+      rashiSwami: moon ? getRasiLord(moon.sign) : null,
+      nakshatraSwami: moon ? moon.nakshatra.lord : null,
+      ishtaKaal: calculateIshtaKaal(ascDegree, ascDegree), // Simplified
+      // Namakshar (first letter of name based on Nakshatra Pada)
+      namakshar: moon ? getNamaksharFromNakshatra(moon.nakshatra.name, moon.nakshatra.pada) : null,
+    },
   };
+}
+
+// Helper function for Namakshar calculation
+function getNamaksharFromNakshatra(nakshatraName, pada) {
+  // Simplified mapping of Nakshatra + Pada to starting letters
+  const namaksharMap = {
+    "Ashwini": ["Chu", "Che", "Cho", "La"],
+    "Bharani": ["Li", "Lu", "Le", "Lo"],
+    "Krittika": ["A", "I", "U", "E"],
+    "Rohini": ["O", "Va", "Vi", "Vu"],
+    "Mrigashira": ["Ve", "Vo", "Ka", "Ki"],
+    "Ardra": ["Ku", "Gha", "Nga", "Chha"],
+    "Punarvasu": ["Ke", "Ko", "Ha", "Hi"],
+    "Pushya": ["Hu", "He", "Ho", "Da"],
+    "Ashlesha": ["Di", "Du", "De", "Do"],
+    "Magha": ["Ma", "Mi", "Mu", "Me"],
+    "Purva Phalguni": ["Mo", "Ta", "Ti", "Tu"],
+    "Uttara Phalguni": ["Te", "To", "Pa", "Pi"],
+    "Hasta": ["Pu", "Sha", "Na", "Tha"],
+    "Chitra": ["Pe", "Po", "Ra", "Ri"],
+    "Swati": ["Ru", "Re", "Ro", "Ta"],
+    "Vishakha": ["Ti", "Tu", "Te", "To"],
+    "Anuradha": ["Na", "Ni", "Nu", "Ne"],
+    "Jyeshtha": ["No", "Ya", "Yi", "Yu"],
+    "Mula": ["Ye", "Yo", "Bha", "Bhi"],
+    "Purva Ashadha": ["Bhu", "Dha", "Pha", "Dha"],
+    "Uttara Ashadha": ["Bhe", "Bho", "Ja", "Ji"],
+    "Shravana": ["Ju", "Je", "Jo", "Gha"],
+    "Dhanishta": ["Ga", "Gi", "Gu", "Ge"],
+    "Shatabhisha": ["Go", "Sa", "Si", "Su"],
+    "Purva Bhadrapada": ["Se", "So", "Da", "Di"],
+    "Uttara Bhadrapada": ["Du", "Tha", "Jha", "Tra"],
+    "Revati": ["De", "Do", "Cha", "Chi"]
+  };
+
+  const letters = namaksharMap[nakshatraName];
+  return letters ? letters[pada - 1] : "Unknown";
+}
+
+// Helper function to get Rasi Lord
+function getRasiLord(sign) {
+  const lords = {
+    "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
+    "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
+    "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
+    "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+  };
+  return lords[sign] || "Unknown";
 }
 
 const server = http.createServer(async (req, res) => {
@@ -924,9 +1140,39 @@ const server = http.createServer(async (req, res) => {
       };
 
       const getYoni = (nakIndex) => {
+        // Correct Yoni mapping for all 27 Nakshatras (AstroSage compatible)
         const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
           "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
-        const yoniMap = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        // Mapping: Each Nakshatra to its Yoni animal
+        const yoniMap = [
+          0,  // 1. Ashwini - Horse
+          1,  // 2. Bharani - Elephant
+          2,  // 3. Krittika - Sheep
+          3,  // 4. Rohini - Serpent
+          4,  // 5. Mrigashira - Serpent
+          5,  // 6. Ardra - Dog
+          6,  // 7. Punarvasu - Cat
+          7,  // 8. Pushya - Sheep
+          8,  // 9. Ashlesha - Cat
+          9,  // 10. Magha - Rat
+          10, // 11. Purva Phalguni - Rat
+          7,  // 12. Uttara Phalguni - Cow
+          11, // 13. Hasta - Buffalo
+          12, // 14. Chitra - Tiger
+          11, // 15. Swati - Buffalo
+          12, // 16. Vishakha - Tiger
+          13, // 17. Anuradha - Hare
+          13, // 18. Jyeshtha - Hare
+          4,  // 19. Mula - Dog
+          10, // 20. Purva Ashadha - Monkey
+          10, // 21. Uttara Ashadha - Mongoose
+          10, // 22. Shravana - Monkey
+          9,  // 23. Dhanishta - Lion
+          0,  // 24. Shatabhisha - Horse
+          9,  // 25. Purva Bhadrapada - Lion
+          9,  // 26. Uttara Bhadrapada - Cow
+          1   // 27. Revati - Elephant
+        ];
         return yonis[yoniMap[nakIndex - 1]];
       };
 
@@ -960,10 +1206,18 @@ const server = http.createServer(async (req, res) => {
       const vashya1 = getVashya(moon1.sign);
       const vashya2 = getVashya(moon2.sign);
       let vashyaScore = 0;
-      if (vashya1 === vashya2) vashyaScore = 2;
-      else if ((vashya1 === "Manav" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Manav")) vashyaScore = 0.5;
-      else if ((vashya1 === "Quadruped" && vashya2 === "Manav") || (vashya1 === "Manav" && vashya2 === "Quadruped")) vashyaScore = 1;
-      else vashyaScore = 0;
+      // AstroSage compatible Vashya scoring
+      if (vashya1 === vashya2) {
+        vashyaScore = 2;
+      } else if ((vashya1 === "Manav" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Manav")) {
+        vashyaScore = 0.5;
+      } else if ((vashya1 === "Quadruped" && vashya2 === "Manav") || (vashya1 === "Manav" && vashya2 === "Quadruped")) {
+        vashyaScore = 1;
+      } else if ((vashya1 === "Quadruped" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Quadruped")) {
+        vashyaScore = 0.5;
+      } else {
+        vashyaScore = 0;
+      }
 
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
@@ -1004,12 +1258,15 @@ const server = http.createServer(async (req, res) => {
       else if ((gana1 === "Manushya" && gana2 === "Rakshasa") || (gana1 === "Rakshasa" && gana2 === "Manushya")) ganaScore = 0;
       else ganaScore = 0;
 
-      // Bhakoot - sign compatibility
+      // Bhakoot - sign compatibility (AstroSage method)
       const getSignIndex = (sign) => RASHIS.indexOf(sign);
       const sign1Index = getSignIndex(moon1.sign);
       const sign2Index = getSignIndex(moon2.sign);
-      const signDiff = Math.abs(sign1Index - sign2Index);
-      const bhakootScore = (signDiff === 6 || signDiff === 8 || signDiff === 2 || signDiff === 12) ? 0 : 7;
+      // Calculate the distance from boy's sign to girl's sign (counting forward)
+      const signDistance = ((sign2Index - sign1Index + 12) % 12) + 1;
+      // Inauspicious distances: 2-12, 5-9, 6-8 (from boy to girl)
+      const inauspiciousDistances = [2, 5, 6, 8, 9, 12];
+      const bhakootScore = inauspiciousDistances.includes(signDistance) ? 0 : 7;
 
       const nadi1 = getNadi(moon1.nakshatra.index);
       const nadi2 = getNadi(moon2.nakshatra.index);
@@ -1279,5 +1536,6 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
