@@ -1612,7 +1612,9 @@ const server = http.createServer(async (req, res) => {
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
       const goodTaras = ["Sadhak", "Mitra", "Param Mitra", "Sampat", "Kshema"];
-      const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 : 1.5;
+      // If both have good Taras, give full 3 points
+      const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 :
+        (goodTaras.includes(tara1) || goodTaras.includes(tara2)) ? 1.5 : 0;
 
       const yoni1 = getYoni(moon1.nakshatra.index);
       const yoni2 = getYoni(moon2.nakshatra.index);
@@ -1625,8 +1627,9 @@ const server = http.createServer(async (req, res) => {
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
       let grahaMaitriScore = 0;
-      if (lord1 === lord2) grahaMaitriScore = 5;
-      else {
+      if (lord1 === lord2) {
+        grahaMaitriScore = 5;
+      } else {
         const friendships = {
           "Sun": ["Moon", "Mars", "Jupiter"],
           "Moon": ["Sun", "Mercury"],
@@ -1636,8 +1639,14 @@ const server = http.createServer(async (req, res) => {
           "Venus": ["Mercury", "Saturn"],
           "Saturn": ["Mercury", "Venus"]
         };
-        if (friendships[lord1] && friendships[lord1].includes(lord2)) grahaMaitriScore = 4;
-        else grahaMaitriScore = 0.5;
+        // Check if they are friends (bidirectional)
+        const areFriends = (friendships[lord1] && friendships[lord1].includes(lord2)) ||
+          (friendships[lord2] && friendships[lord2].includes(lord1));
+        if (areFriends) {
+          grahaMaitriScore = 5;  // Changed from 4 to 5 for friends
+        } else {
+          grahaMaitriScore = 0.5;
+        }
       }
 
       const gana1 = getGana(moon1.nakshatra.index);
@@ -1707,24 +1716,23 @@ const server = http.createServer(async (req, res) => {
           gana: gana1,
           nadi: nadi1,
           rasiLord: lord1,
-          moonSign: moon1.sign
+          name: person1.name,
+          ascendant: kundali1.ascendant.sign,
+          moonSign: moon1.sign,
+          chart: generateNorthIndianChart(kundali1.houses)
         },
         girlDetails: {
-          varna: varna2,
-          vashya: vashya2,
-          tara: tara2,
-          yoni: yoni2,
-          gana: gana2,
-          nadi: nadi2,
-          rasiLord: lord2,
-          moonSign: moon2.sign
+          name: person2.name,
+          ascendant: kundali2.ascendant.sign,
+          moonSign: moon2.sign,
+          chart: generateNorthIndianChart(kundali2.houses)
         },
         recommendation: totalScore >= 28
-          ? "Excellent match! This union is highly auspicious according to Vedic astrology. The couple is likely to have a harmonious and prosperous married life."
+          ? "Excellent match! This is a highly compatible match with strong potential for a successful marriage."
           : totalScore >= 24
-            ? "Very good compatibility! This match shows strong potential for a happy marriage. Minor differences can be resolved with understanding and mutual respect."
+            ? "Very good compatibility. Marriage is recommended with minor considerations."
             : totalScore >= 18
-              ? "Good compatibility. The match is favorable for marriage. Consult an astrologer for remedies to strengthen weaker areas."
+              ? "Good compatibility. Marriage is possible with mutual understanding and effort."
               : "Average compatibility. Marriage is possible but may require effort and understanding. Recommended to consult an expert astrologer for detailed analysis and remedies."
       };
 
@@ -1971,6 +1979,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
