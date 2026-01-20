@@ -1718,14 +1718,19 @@ const server = http.createServer(async (req, res) => {
           rasiLord: lord1,
           name: person1.name,
           ascendant: kundali1.ascendant.sign,
-          moonSign: moon1.sign,
-          chart: generateNorthIndianChart(kundali1.houses)
+          moonSign: moon1.sign
         },
         girlDetails: {
+          varna: varna2,
+          vashya: vashya2,
+          tara: tara2,
+          yoni: yoni2,
+          gana: gana2,
+          nadi: nadi2,
+          rasiLord: lord2,
           name: person2.name,
           ascendant: kundali2.ascendant.sign,
-          moonSign: moon2.sign,
-          chart: generateNorthIndianChart(kundali2.houses)
+          moonSign: moon2.sign
         },
         recommendation: totalScore >= 28
           ? "Excellent match! This is a highly compatible match with strong potential for a successful marriage."
@@ -1979,9 +1984,3 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
-
-
-
-
-
-
