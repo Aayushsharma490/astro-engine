@@ -619,6 +619,57 @@ function calculateIshtaKaal(sunriseLong, ascDegree) {
   return `${hours}h ${minutes}m after sunrise`;
 }
 
+// Helper functions for Auspicious Suggestions
+function getGemstoneForRashi(rashi) {
+  const gemstones = {
+    "Aries": "Red Coral (Moonga)", "Taurus": "Diamond (Heera)", "Gemini": "Emerald (Panna)",
+    "Cancer": "Pearl (Moti)", "Leo": "Ruby (Manik)", "Virgo": "Emerald (Panna)",
+    "Libra": "Diamond (Heera)", "Scorpio": "Red Coral (Moonga)", "Sagittarius": "Yellow Sapphire (Pukhraj)",
+    "Capricorn": "Blue Sapphire (Neelam)", "Aquarius": "Blue Sapphire (Neelam)", "Pisces": "Yellow Sapphire (Pukhraj)"
+  };
+  return gemstones[rashi] || "Consult an astrologer";
+}
+
+function getGemstoneDay(rashi) {
+  const days = {
+    "Aries": "Tuesday", "Taurus": "Friday", "Gemini": "Wednesday",
+    "Cancer": "Monday", "Leo": "Sunday", "Virgo": "Wednesday",
+    "Libra": "Friday", "Scorpio": "Tuesday", "Sagittarius": "Thursday",
+    "Capricorn": "Saturday", "Aquarius": "Saturday", "Pisces": "Thursday"
+  };
+  return days[rashi] || "Thursday";
+}
+
+function getFavorableColors(rashi) {
+  const colors = {
+    "Aries": "Red, Orange, Yellow", "Taurus": "White, Pink, Light Blue", "Gemini": "Green, Yellow, Orange",
+    "Cancer": "White, Silver, Cream", "Leo": "Gold, Orange, Red", "Virgo": "Green, White, Yellow",
+    "Libra": "White, Pink, Light Blue", "Scorpio": "Red, Maroon, Brown", "Sagittarius": "Yellow, Orange, Gold",
+    "Capricorn": "Black, Dark Blue, Grey", "Aquarius": "Blue, Grey, Black", "Pisces": "Yellow, Orange, Pink"
+  };
+  return colors[rashi] || "White, Yellow";
+}
+
+function getAuspiciousDays(rashi) {
+  const days = {
+    "Aries": "Tuesday, Saturday", "Taurus": "Friday, Wednesday", "Gemini": "Wednesday, Friday",
+    "Cancer": "Monday, Thursday", "Leo": "Sunday, Tuesday", "Virgo": "Wednesday, Friday",
+    "Libra": "Friday, Wednesday", "Scorpio": "Tuesday, Thursday", "Sagittarius": "Thursday, Tuesday",
+    "Capricorn": "Saturday, Wednesday", "Aquarius": "Saturday, Thursday", "Pisces": "Thursday, Tuesday"
+  };
+  return days[rashi] || "Thursday, Sunday";
+}
+
+function getLuckyNumbers(rashi) {
+  const numbers = {
+    "Aries": "1, 9, 18, 27", "Taurus": "2, 6, 15, 24", "Gemini": "3, 5, 14, 23",
+    "Cancer": "2, 7, 16, 25", "Leo": "1, 4, 10, 19", "Virgo": "3, 5, 14, 23",
+    "Libra": "2, 6, 15, 24", "Scorpio": "9, 18, 27, 36", "Sagittarius": "3, 12, 21, 30",
+    "Capricorn": "8, 17, 26, 35", "Aquarius": "4, 13, 22, 31", "Pisces": "3, 7, 12, 16"
+  };
+  return numbers[rashi] || "1, 3, 5, 7";
+}
+
 
 function calculateVimshottari(moonDegree, birthUtcDate) {
   const nakDetails = calculateNakshatra(moonDegree);
@@ -1383,6 +1434,50 @@ function computeKundali(payload) {
           remedies: {
             en: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'en'),
             hi: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'hi')
+          },
+          // NEW: भाव फल - 12 Houses Analysis
+          bhavPhal: {
+            house1: { en: `House 1 (Self): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'en').substring(0, 200)}...`, hi: `प्रथम भाव (स्वयं): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'hi').substring(0, 200)}...` },
+            house2: { en: `House 2 (Wealth): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `द्वितीय भाव (धन): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house3: { en: 'House 3 (Siblings): Communication skills are strong. Courage and determination will help in ventures.', hi: 'तृतीय भाव (भाई-बहन): संचार कौशल मजबूत है। साहस और दृढ़ संकल्प उद्यमों में मदद करेगा।' },
+            house4: { en: 'House 4 (Mother & Home): Domestic happiness and property matters are favorable. Strong emotional foundation.', hi: 'चतुर्थ भाव (माता और घर): घरेलू सुख और संपत्ति के मामले अनुकूल हैं। मजबूत भावनात्मक आधार।' },
+            house5: { en: `House 5 (Children & Education): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `पंचम भाव (संतान और शिक्षा): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house6: { en: `House 6 (Health & Enemies): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `षष्ठ भाव (स्वास्थ्य और शत्रु): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house7: { en: `House 7 (Marriage): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'en').substring(0, 200)}...`, hi: `सप्तम भाव (विवाह): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'hi').substring(0, 200)}...` },
+            house8: { en: 'House 8 (Longevity): Transformation and hidden knowledge bring growth. Research and occult sciences may interest you.', hi: 'अष्टम भाव (आयु): परिवर्तन और गुप्त ज्ञान विकास लाते हैं। अनुसंधान और गुप्त विज्ञान में रुचि हो सकती है।' },
+            house9: { en: 'House 9 (Fortune): Higher education and spiritual pursuits are favored. Long journeys bring opportunities.', hi: 'नवम भाव (भाग्य): उच्च शिक्षा और आध्यात्मिक गतिविधियां अनुकूल हैं। लंबी यात्राएं अवसर लाती हैं।' },
+            house10: { en: `House 10 (Career): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `दशम भाव (करियर): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house11: { en: 'House 11 (Gains): Financial gains through friends and networks. Aspirations will be fulfilled with effort.', hi: 'एकादश भाव (लाभ): मित्रों और नेटवर्क के माध्यम से वित्तीय लाभ। प्रयास से आकांक्षाएं पूरी होंगी।' },
+            house12: { en: 'House 12 (Spirituality): Expenses on spiritual and charitable activities. Foreign connections possible.', hi: 'द्वादश भाव (आध्यात्मिकता): आध्यात्मिक और धर्मार्थ गतिविधियों पर व्यय। विदेशी संबंध संभव।' },
+          },
+          // NEW: वर्ष फल - Yearly Prediction
+          yearlyPrediction: {
+            en: `Current Year Analysis: Based on planetary transits, this year brings opportunities for growth. ${vimshottariDasha.currentDasha.planet} Mahadasha influences your path. Focus on ${RASHIS[ascSignIndex]} qualities for success.`,
+            hi: `वर्तमान वर्ष विश्लेषण: ग्रहों के गोचर के आधार पर, यह वर्ष विकास के अवसर लाता है। ${vimshottariDasha.currentDasha.planet} महादशा आपके मार्ग को प्रभावित करती है। सफलता के लिए ${RASHIS[ascSignIndex]} गुणों पर ध्यान दें।`
+          },
+          // NEW: महादशा फल - Mahadasha Prediction
+          mahadashaPhal: {
+            en: `Current Mahadasha: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} to ${vimshottariDasha.currentDasha.endDate.split('T')[0]}). This period emphasizes ${vimshottariDasha.currentDasha.planet}'s qualities in your life. ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'en')}`,
+            hi: `वर्तमान महादशा: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} से ${vimshottariDasha.currentDasha.endDate.split('T')[0]} तक)। यह अवधि आपके जीवन में ${vimshottariDasha.currentDasha.planet} के गुणों पर जोर देती है। ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'hi')}`
+          },
+          // NEW: शुभ सुझाव - Auspicious Suggestions
+          auspiciousSuggestions: {
+            gemstone: {
+              en: `Lucky Gemstone: ${getGemstoneForRashi(moon ? moon.sign : RASHIS[ascSignIndex])}. Wear on ${getGemstoneDay(moon ? moon.sign : RASHIS[ascSignIndex])} for best results.`,
+              hi: `शुभ रत्न: ${getGemstoneForRashi(moon ? moon.sign : RASHIS[ascSignIndex])}। सर्वोत्तम परिणामों के लिए ${getGemstoneDay(moon ? moon.sign : RASHIS[ascSignIndex])} को पहनें।`
+            },
+            colors: {
+              en: `Favorable Colors: ${getFavorableColors(moon ? moon.sign : RASHIS[ascSignIndex])}. These colors enhance your aura and bring positivity.`,
+              hi: `अनुकूल रंग: ${getFavorableColors(moon ? moon.sign : RASHIS[ascSignIndex])}। ये रंग आपकी आभा को बढ़ाते हैं और सकारात्मकता लाते हैं।`
+            },
+            days: {
+              en: `Auspicious Days: ${getAuspiciousDays(moon ? moon.sign : RASHIS[ascSignIndex])}. Important work should be done on these days.`,
+              hi: `शुभ दिन: ${getAuspiciousDays(moon ? moon.sign : RASHIS[ascSignIndex])}। महत्वपूर्ण कार्य इन दिनों किए जाने चाहिए।`
+            },
+            numbers: {
+              en: `Lucky Numbers: ${getLuckyNumbers(moon ? moon.sign : RASHIS[ascSignIndex])}. These numbers bring fortune and success.`,
+              hi: `शुभ अंक: ${getLuckyNumbers(moon ? moon.sign : RASHIS[ascSignIndex])}। ये अंक भाग्य और सफलता लाते हैं।`
+            }
           }
         };
       } catch (error) {
@@ -2027,6 +2122,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
