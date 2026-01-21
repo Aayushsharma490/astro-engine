@@ -1542,18 +1542,18 @@ function computeKundali(payload) {
             en: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'en'),
             hi: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'hi')
           },
-          // NEW: भाव फल - 12 Houses Analysis
+          // NEW: भाव फल - 12 Houses Analysis (Simplified)
           bhavPhal: {
-            house1: { en: `House 1 (Self): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'en').substring(0, 200)}...`, hi: `प्रथम भाव (स्वयं): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'hi').substring(0, 200)}...` },
-            house2: { en: `House 2 (Wealth): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `द्वितीय भाव (धन): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house1: { en: 'House 1 (Self): Strong personality and good health indicated. Leadership qualities present.', hi: 'प्रथम भाव (स्वयं): मजबूत व्यक्तित्व और अच्छा स्वास्थ्य संकेत। नेतृत्व गुण मौजूद।' },
+            house2: { en: 'House 2 (Wealth): Financial stability through efforts. Family support strong.', hi: 'द्वितीय भाव (धन): प्रयासों के माध्यम से वित्तीय स्थिरता। पारिवारिक समर्थन मजबूत।' },
             house3: { en: 'House 3 (Siblings): Communication skills are strong. Courage and determination will help in ventures.', hi: 'तृतीय भाव (भाई-बहन): संचार कौशल मजबूत है। साहस और दृढ़ संकल्प उद्यमों में मदद करेगा।' },
             house4: { en: 'House 4 (Mother & Home): Domestic happiness and property matters are favorable. Strong emotional foundation.', hi: 'चतुर्थ भाव (माता और घर): घरेलू सुख और संपत्ति के मामले अनुकूल हैं। मजबूत भावनात्मक आधार।' },
-            house5: { en: `House 5 (Children & Education): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `पंचम भाव (संतान और शिक्षा): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
-            house6: { en: `House 6 (Health & Enemies): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `षष्ठ भाव (स्वास्थ्य और शत्रु): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
-            house7: { en: `House 7 (Marriage): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'en').substring(0, 200)}...`, hi: `सप्तम भाव (विवाह): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'hi').substring(0, 200)}...` },
+            house5: { en: 'House 5 (Children & Education): Education prospects good. Creative abilities present.', hi: 'पंचम भाव (संतान और शिक्षा): शिक्षा की संभावनाएं अच्छी। रचनात्मक क्षमताएं मौजूद।' },
+            house6: { en: 'House 6 (Health & Enemies): Health requires attention. Victory over obstacles expected.', hi: 'षष्ठ भाव (स्वास्थ्य और शत्रु): स्वास्थ्य पर ध्यान देने की आवश्यकता। बाधाओं पर विजय की उम्मीद।' },
+            house7: { en: 'House 7 (Marriage): Partnership and marriage prospects favorable. Harmony in relationships.', hi: 'सप्तम भाव (विवाह): साझेदारी और विवाह की संभावनाएं अनुकूल। रिश्तों में सद्भाव।' },
             house8: { en: 'House 8 (Longevity): Transformation and hidden knowledge bring growth. Research and occult sciences may interest you.', hi: 'अष्टम भाव (आयु): परिवर्तन और गुप्त ज्ञान विकास लाते हैं। अनुसंधान और गुप्त विज्ञान में रुचि हो सकती है।' },
             house9: { en: 'House 9 (Fortune): Higher education and spiritual pursuits are favored. Long journeys bring opportunities.', hi: 'नवम भाव (भाग्य): उच्च शिक्षा और आध्यात्मिक गतिविधियां अनुकूल हैं। लंबी यात्राएं अवसर लाती हैं।' },
-            house10: { en: `House 10 (Career): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `दशम भाव (करियर): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house10: { en: 'House 10 (Career): Career growth through dedication. Professional success indicated.', hi: 'दशम भाव (करियर): समर्पण के माध्यम से करियर विकास। पेशेवर सफलता संकेत।' },
             house11: { en: 'House 11 (Gains): Financial gains through friends and networks. Aspirations will be fulfilled with effort.', hi: 'एकादश भाव (लाभ): मित्रों और नेटवर्क के माध्यम से वित्तीय लाभ। प्रयास से आकांक्षाएं पूरी होंगी।' },
             house12: { en: 'House 12 (Spirituality): Expenses on spiritual and charitable activities. Foreign connections possible.', hi: 'द्वादश भाव (आध्यात्मिकता): आध्यात्मिक और धर्मार्थ गतिविधियों पर व्यय। विदेशी संबंध संभव।' },
           },
@@ -1588,10 +1588,12 @@ function computeKundali(payload) {
           }
         };
       } catch (error) {
-        console.error('[astro-engine] Error generating Phallit:', error);
-        // Return fallback predictions
+        console.error('[astro-engine] ❌ ERROR generating Phallit:', error);
+        console.error('[astro-engine] Error stack:', error.stack);
+        console.error('[astro-engine] Error message:', error.message);
+        // Return fallback predictions with error info
         return {
-          lagnaPersonality: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
+          lagnaPersonality: { en: `Analysis error: ${error.message}`, hi: `विश्लेषण त्रुटि: ${error.message}` },
           moonEmotions: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
           education: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
           career: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
@@ -2229,6 +2231,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
