@@ -575,10 +575,11 @@ function calculateMangalDosha(planets, ascDegree) {
 
 function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
+  // AstroSage-compatible Sanskrit Yoni names
   const yonis = [
-    "Horse", "Elephant", "Sheep", "Serpent", "Serpent", "Dog", "Cat", "Sheep", "Cat",
-    "Rat", "Rat", "Cow", "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer",
-    "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse", "Lion", "Cow", "Elephant"
+    "Ashwa", "Gaja", "Mesha", "Sarpa", "Sarpa", "Shwan", "Marjar", "Mesha", "Marjar",
+    "Mushak", "Mushak", "Gau", "Mahish", "Vyaghra", "Mahish", "Vyaghra", "Mriga", "Mriga",
+    "Shwan", "Vanar", "Nakul", "Vanar", "Simha", "Ashwa", "Simha", "Gau", "Gaja"
   ];
   return yonis[nakIndex - 1] || "Unknown";
 }
@@ -1252,6 +1253,7 @@ function computeKundali(payload) {
       longitude: ketuLongitude,
       latitude: rahu.latitude * -1,
       degree: ketuLongitude % 30,
+      degreeInSign: ketuLongitude % 30, // Exact degree within sign
       sign: RASHIS[ketuSignIndex],
       signIndex: ketuSignIndex,
       nakshatra: ketuNakshatra,
