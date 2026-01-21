@@ -44,7 +44,8 @@ try {
 }
 
 if (!epheOk) {
-  throw new Error("EPHE FILES NOT LOADED");
+  console.warn("[astro-engine][WARNING] EPHE files not found, calculations may fail!");
+  // Don't throw - let server start and fail gracefully on requests
 }
 
 // Make sure Swiss Ephemeris always uses external ephemeris files with Lahiri
@@ -2068,9 +2069,6 @@ async function startWhatsAppConnection() {
   }
 }
 
-// Start WhatsApp connection on server start
-startWhatsAppConnection();
-
 // Global Error Handlers to prevent 502 crashes
 process.on('uncaughtException', (err) => {
   console.error('[astro-engine] Uncaught Exception:', err);
@@ -2082,13 +2080,19 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[astro-engine] Listening on http://0.0.0.0:${PORT}`);
-  console.log(`[astro-engine] WhatsApp endpoints available:`);
-  console.log(`  - GET  /whatsapp/status`);
-  console.log(`  - POST /whatsapp/send`);
-  console.log(`  - POST /whatsapp/disconnect`);
-  console.log(`  - POST /whatsapp/reconnect`);
+  console.log(`[astro-engine] ✅ Server listening on http://0.0.0.0:${PORT}`);
+  console.log(`[astro-engine] Kundali endpoints: /kundali, /api/kundali-matching`);
+  console.log(`[astro-engine] WhatsApp endpoints: /whatsapp/status, /whatsapp/send`);
+
+  // Start WhatsApp AFTER server is listening (non-blocking)
+  setTimeout(() => {
+    console.log('[astro-engine] Starting WhatsApp connection...');
+    startWhatsAppConnection().catch(err => {
+      console.error('[astro-engine] WhatsApp init failed (non-fatal):', err.message);
+    });
+  }, 1000);
 });
+
 
 
 
