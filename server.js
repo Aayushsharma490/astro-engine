@@ -1626,7 +1626,7 @@ const server = http.createServer(async (req, res) => {
       const yoni1 = getYoni(moon1.nakshatra.index);
       const yoni2 = getYoni(moon2.nakshatra.index);
       console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
-      
+
       // Yoni scoring as per AstroSage
       const yoniCompatibility = {
         "Horse-Mare": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Snake-Snake": 4,
@@ -1645,13 +1645,14 @@ const server = http.createServer(async (req, res) => {
         "Cat-Rat": 0, "Rat-Cat": 0,
         "Cow-Tiger": 0, "Tiger-Cow": 0
       };
-      
+
       const yoniKey = `${yoni1}-${yoni2}`;
       let yoniScore = yoniCompatibility[yoniKey];
       if (yoniScore === undefined) {
         // If not in table, check if same
         yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default: same=4, different=2
       }
+      console.log('[Matching] Yoni Score:', yoniScore, 'for', yoniKey);
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
@@ -1701,6 +1702,10 @@ const server = http.createServer(async (req, res) => {
       const nadiScore = nadi1 !== nadi2 ? 8 : 0;
 
       const totalScore = varnaScore + vashyaScore + taraScore + yoniScore + grahaMaitriScore + ganaScore + bhakootScore + nadiScore;
+      const maxScore = 36;
+      const percentage = Math.round((totalScore / maxScore) * 100);
+
+      console.log('[Matching] Total Score:', totalScore, '/', maxScore);
 
       // Mangal Dosha calculation
       const calculateMangalDosha = (kundali) => {
@@ -1977,3 +1982,4 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
