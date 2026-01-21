@@ -631,7 +631,7 @@ function getVashya(moonSign) {
   const vashyas = {
     "Aries": "Chatu", "Taurus": "Chatu", "Leo": "Chatu",
     "Gemini": "Manav", "Virgo": "Manav", "Libra": "Manav", "Aquarius": "Manav", "Sagittarius": "Manav",
-    "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
+    "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Chatu",
     "Scorpio": "Keeta"
   };
   return vashyas[moonSign] || "Unknown";
@@ -1228,6 +1228,7 @@ function computeKundali(payload) {
       longitude: siderealLongitude,
       latitude: latitudeValue,
       degree,
+      degreeInSign: degree, // Exact degree within sign for chart display
       sign: RASHIS[signIndex],
       signIndex,
       nakshatra,
@@ -1743,12 +1744,16 @@ const server = http.createServer(async (req, res) => {
         vashyaScore = 0;
       }
 
-      const t1Idx = ((moon2.nakshatra.index - moon1.nakshatra.index + 27) % 9) || 9;
-      const t2Idx = ((moon1.nakshatra.index - moon2.nakshatra.index + 27) % 9) || 9;
-      const tara1 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t1Idx];
-      const tara2 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t2Idx];
+      // Tara calculation: count from boy's nakshatra to girl's nakshatra
+      const taraCount1 = ((moon2.nakshatra.index - moon1.nakshatra.index + 27) % 27) + 1;
+      const taraCount2 = ((moon1.nakshatra.index - moon2.nakshatra.index + 27) % 27) + 1;
+      const t1Idx = ((taraCount1 - 1) % 9) + 1; // 1-9
+      const t2Idx = ((taraCount2 - 1) % 9) + 1; // 1-9
+      const taraNames = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
+      const tara1 = taraNames[t1Idx];
+      const tara2 = taraNames[t2Idx];
 
-      const goodTaraIndices = [1, 2, 4, 6, 8, 9];
+      const goodTaraIndices = [2, 4, 6, 8, 9]; // Sampat, Kshema, Sadhak, Mitra, Ati-Mitra
       let taraScore = 0;
       if (goodTaraIndices.includes(t1Idx)) taraScore += 1.5;
       if (goodTaraIndices.includes(t2Idx)) taraScore += 1.5;
@@ -1779,11 +1784,11 @@ const server = http.createServer(async (req, res) => {
       const maitriScores = {
         "Sun": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 4, "Jupiter": 5, "Venus": 0, "Saturn": 0 },
         "Moon": { "Sun": 5, "Moon": 5, "Mars": 4, "Mercury": 5, "Jupiter": 4, "Venus": 4, "Saturn": 4 },
-        "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3, "Saturn": 3 },
+        "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3, "Saturn": 0.5 },
         "Mercury": { "Sun": 5, "Moon": 0, "Mars": 4, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 4 },
         "Jupiter": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0.5, "Jupiter": 5, "Venus": 0.5, "Saturn": 4 },
         "Venus": { "Sun": 0, "Moon": 0, "Mars": 3, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 5 },
-        "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
+        "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0.5, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
       };
       let grahaMaitriScore = (maitriScores[lord1] && maitriScores[lord1][lord2] !== undefined) ? maitriScores[lord1][lord2] : 0.5;
 
