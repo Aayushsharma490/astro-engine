@@ -1559,13 +1559,13 @@ function computeKundali(payload) {
           },
           // NEW: वर्ष फल - Yearly Prediction
           yearlyPrediction: {
-            en: `Current Year Analysis: Based on planetary transits, this year brings opportunities for growth. ${vimshottariDasha.currentDasha.planet} Mahadasha influences your path. Focus on ${RASHIS[ascSignIndex]} qualities for success.`,
-            hi: `वर्तमान वर्ष विश्लेषण: ग्रहों के गोचर के आधार पर, यह वर्ष विकास के अवसर लाता है। ${vimshottariDasha.currentDasha.planet} महादशा आपके मार्ग को प्रभावित करती है। सफलता के लिए ${RASHIS[ascSignIndex]} गुणों पर ध्यान दें।`
+            en: `Current Year Analysis: Based on planetary transits, this year brings opportunities for growth. ${vimshottariDasha?.currentDasha?.planet || 'Planetary'} Mahadasha influences your path. Focus on ${RASHIS[ascSignIndex]} qualities for success.`,
+            hi: `वर्तमान वर्ष विश्लेषण: ग्रहों के गोचर के आधार पर, यह वर्ष विकास के अवसर लाता है। ${vimshottariDasha?.currentDasha?.planet || 'ग्रह'} महादशा आपके मार्ग को प्रभावित करती है। सफलता के लिए ${RASHIS[ascSignIndex]} गुणों पर ध्यान दें।`
           },
           // NEW: महादशा फल - Mahadasha Prediction
           mahadashaPhal: {
-            en: `Current Mahadasha: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} to ${vimshottariDasha.currentDasha.endDate.split('T')[0]}). This period emphasizes ${vimshottariDasha.currentDasha.planet}'s qualities in your life. ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'en')}`,
-            hi: `वर्तमान महादशा: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} से ${vimshottariDasha.currentDasha.endDate.split('T')[0]} तक)। यह अवधि आपके जीवन में ${vimshottariDasha.currentDasha.planet} के गुणों पर जोर देती है। ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'hi')}`
+            en: vimshottariDasha?.currentDasha ? `Current Mahadasha: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} to ${vimshottariDasha.currentDasha.endDate.split('T')[0]}). This period emphasizes ${vimshottariDasha.currentDasha.planet}'s qualities in your life. ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'en')}` : 'Mahadasha analysis: Planetary periods influence life events. Consult detailed dasha chart for timing.',
+            hi: vimshottariDasha?.currentDasha ? `वर्तमान महादशा: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} से ${vimshottariDasha.currentDasha.endDate.split('T')[0]} तक)। यह अवधि आपके जीवन में ${vimshottariDasha.currentDasha.planet} के गुणों पर जोर देती है। ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'hi')}` : 'महादशा विश्लेषण: ग्रह अवधि जीवन की घटनाओं को प्रभावित करती है। समय के लिए विस्तृत दशा चार्ट देखें।'
           },
           // NEW: शुभ सुझाव - Auspicious Suggestions
           auspiciousSuggestions: {
@@ -2231,6 +2231,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
