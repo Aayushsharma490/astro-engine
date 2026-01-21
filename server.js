@@ -1,7 +1,9 @@
 "use strict";
 
 /**
- * Astro Engine (FIX MODE)
+ * VipraKarma Astrology Engine
+ * Version: 2.0 - Fixed all Guna calculations for exact AstroSage matching
+ * Last updated: 2026-01-21 (FIX MODE)
  * -----------------------
  * Dedicated Node.js microservice that performs all Swiss Ephemeris
  * calculations outside the Next.js serverless runtime.
@@ -554,6 +556,7 @@ function calculateMangalDosha(planets, ascDegree) {
 }
 
 function getYoniFromNakshatra(nakIndex) {
+  if (!nakIndex) return "Unknown";
   const yonis = ["Horse", "Elephant", "Sheep", "Snake", "Dog", "Cat", "Rat", "Cow",
     "Buffalo", "Tiger", "Deer", "Monkey", "Lion", "Mongoose"];
   // Correct yoni mapping for all 27 nakshatras
@@ -573,14 +576,15 @@ function getGanaFromNakshatra(nakIndex) {
 }
 
 function getNadiFromNakshatra(nakIndex) {
+  if (!nakIndex) return "Unknown";
   const nadis = ["Adi", "Madhya", "Antya"];
   return nadis[(nakIndex - 1) % 3];
 }
 
 function getTara(nak1, nak2) {
-  // Correct Tara calculation: count from nak1 to nak2
-  let count = nak2 - nak1;
-  if (count <= 0) count += 27;
+  if (!nak1 || !nak2) return "Unknown";
+  // Correct Tara calculation: count from nak1 to nak2 inclusive
+  let count = ((nak2 - nak1 + 27) % 27) + 1;
 
   // Tara repeats every 9 nakshatras
   const taraIndex = (count - 1) % 9;
@@ -1256,6 +1260,7 @@ function computeKundali(payload) {
         name: planet.nakshatra.name,
         lord: planet.nakshatra.lord,
         pada: planet.nakshatra.pada,
+        index: planet.nakshatra.index,
       },
       navamsaSign: RASHIS[planet.navamsaSignIndex],
       dashamsaSign: RASHIS[planet.dashamsaSignIndex],
@@ -1631,7 +1636,7 @@ const server = http.createServer(async (req, res) => {
 
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
-      console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
+      console.log('[Matching] Tara1 (Boy to Girl):', tara1, 'Tara2 (Girl to Boy):', tara2);
       const goodTaras = ["Sadhaka", "Mitra", "Ati Mitra", "Sampat", "Kshema"];
       // If both have good Taras, give full 3 points
       const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 :
@@ -1664,8 +1669,9 @@ const server = http.createServer(async (req, res) => {
       const yoniKey = `${yoni1}-${yoni2}`;
       let yoniScore = yoniCompatibility[yoniKey];
       if (yoniScore === undefined) {
-        // If not in table, check if same
-        yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default: same=4, different=2
+        // If not in table, check if same (but only if not Unknown)
+        if (yoni1 === "Unknown" || yoni2 === "Unknown") yoniScore = 0;
+        else yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default: same=4, different=2
       }
       console.log('[Matching] Yoni Score:', yoniScore, 'for', yoniKey);
 
@@ -1998,4 +2004,5 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
