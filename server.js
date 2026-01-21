@@ -2071,14 +2071,25 @@ async function startWhatsAppConnection() {
 // Start WhatsApp connection on server start
 startWhatsAppConnection();
 
-server.listen(PORT, () => {
-  console.log(`[astro-engine] Listening on http://localhost:${PORT}/kundali`);
+// Global Error Handlers to prevent 502 crashes
+process.on('uncaughtException', (err) => {
+  console.error('[astro-engine] Uncaught Exception:', err);
+  // Keep the process alive if possible, or exit gracefully
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[astro-engine] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`[astro-engine] Listening on http://0.0.0.0:${PORT}`);
   console.log(`[astro-engine] WhatsApp endpoints available:`);
   console.log(`  - GET  /whatsapp/status`);
   console.log(`  - POST /whatsapp/send`);
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
