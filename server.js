@@ -1064,7 +1064,7 @@ function computeKundali(payload) {
     const siderealLongitude = normalizeDegree(longitude); // already sidereal due to SEFLG_SIDEREAL
     const signIndex = getSignIndex(siderealLongitude);
     const nakshatra = calculateNakshatra(siderealLongitude);
-    const degreeInSign = siderealLongitude % 30;
+    const degree = siderealLongitude % 30; // Degree within the sign (0-30)
     const navamsaSign = getNavamsaSignIndex(siderealLongitude);
     const dashamsaSign = getDashamsaSignIndex(siderealLongitude);
 
@@ -1072,7 +1072,7 @@ function computeKundali(payload) {
       name: config.name,
       longitude: siderealLongitude,
       latitude: latitudeValue,
-      degreeInSign,
+      degree,
       sign: RASHIS[signIndex],
       signIndex,
       nakshatra,
@@ -1956,4 +1956,5 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
