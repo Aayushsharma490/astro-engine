@@ -1432,6 +1432,11 @@ function getRasiLord(sign) {
   return lords[sign] || "Unknown";
 }
 
+// Generate simple chart SVG
+function generateSimpleChart(ascendant) {
+  return `<svg width="200" height="200" viewBox="0 0 200 200"><rect fill="#1a1a2e" width="200" height="200"/><path stroke="#4a90e2" stroke-width="2" fill="none" d="M100,10 L190,100 L100,190 L10,100 Z"/><line stroke="#4a90e2" stroke-width="1" x1="100" y1="10" x2="100" y2="190"/><line stroke="#4a90e2" stroke-width="1" x1="10" y1="100" x2="190" y2="100"/><text fill="#fff" x="100" y="25" text-anchor="middle" font-size="10">Asc: ${ascendant}</text></svg>`;
+}
+
 const server = http.createServer(async (req, res) => {
   // CORS headers
   if (req.method === "OPTIONS") {
@@ -1721,7 +1726,8 @@ const server = http.createServer(async (req, res) => {
           rasiLord: lord1,
           name: person1.name,
           ascendant: kundali1.ascendant.sign,
-          moonSign: moon1.sign
+          moonSign: moon1.sign,
+          chart: generateSimpleChart(kundali1.ascendant.sign)
         },
         girlDetails: {
           varna: varna2,
@@ -1733,7 +1739,8 @@ const server = http.createServer(async (req, res) => {
           rasiLord: lord2,
           name: person2.name,
           ascendant: kundali2.ascendant.sign,
-          moonSign: moon2.sign
+          moonSign: moon2.sign,
+          chart: generateSimpleChart(kundali2.ascendant.sign)
         },
         recommendation: totalScore >= 28
           ? "Excellent match! This is a highly compatible match with strong potential for a successful marriage."
@@ -1949,3 +1956,4 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
