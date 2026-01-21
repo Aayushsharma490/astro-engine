@@ -1626,11 +1626,32 @@ const server = http.createServer(async (req, res) => {
       const yoni1 = getYoni(moon1.nakshatra.index);
       const yoni2 = getYoni(moon2.nakshatra.index);
       console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
-      let yoniScore = 0;
-      if (yoni1 === yoni2) yoniScore = 4;
-      else if ((yoni1 === "Horse" && yoni2 === "Horse") || (yoni1 === "Elephant" && yoni2 === "Elephant")) yoniScore = 4;
-      else if ((yoni1 === "Buffalo" && yoni2 === "Cow") || (yoni1 === "Cow" && yoni2 === "Buffalo")) yoniScore = 3;
-      else yoniScore = 2;
+      
+      // Yoni scoring as per AstroSage
+      const yoniCompatibility = {
+        "Horse-Mare": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Snake-Snake": 4,
+        "Dog-Dog": 4, "Cat-Cat": 4, "Rat-Rat": 4, "Cow-Cow": 4, "Buffalo-Buffalo": 4,
+        "Tiger-Tiger": 4, "Deer-Deer": 4, "Monkey-Monkey": 4, "Mongoose-Mongoose": 4, "Lion-Lion": 4,
+        "Horse-Horse": 4, "Mare-Mare": 4,
+        // Friendly pairs
+        "Cow-Buffalo": 3, "Buffalo-Cow": 3,
+        "Elephant-Sheep": 3, "Sheep-Elephant": 3,
+        // Enemy pairs
+        "Horse-Buffalo": 0, "Buffalo-Horse": 0,
+        "Elephant-Lion": 0, "Lion-Elephant": 0,
+        "Snake-Mongoose": 0, "Mongoose-Snake": 0,
+        "Monkey-Sheep": 0, "Sheep-Monkey": 0,
+        "Dog-Deer": 0, "Deer-Dog": 0,
+        "Cat-Rat": 0, "Rat-Cat": 0,
+        "Cow-Tiger": 0, "Tiger-Cow": 0
+      };
+      
+      const yoniKey = `${yoni1}-${yoni2}`;
+      let yoniScore = yoniCompatibility[yoniKey];
+      if (yoniScore === undefined) {
+        // If not in table, check if same
+        yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default: same=4, different=2
+      }
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
@@ -1956,5 +1977,3 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
-
-
