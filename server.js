@@ -574,6 +574,14 @@ function getNadiFromNakshatra(nakIndex) {
   return nadis[(nakIndex - 1) % 3];
 }
 
+function getTara(nak1, nak2) {
+  // Calculate Tara based on nakshatra distance
+  const distance = ((nak2 - nak1 + 27) % 27) + 1;
+  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Param Mitra"];
+  const taraIndex = (distance - 1) % 9;
+  return taraNames[taraIndex];
+}
+
 function getVarnaFromSign(sign) {
   const varnas = {
     "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
@@ -1623,8 +1631,8 @@ const server = http.createServer(async (req, res) => {
         (goodTaras.includes(tara1) || goodTaras.includes(tara2)) ? 1.5 : 0;
       console.log('[Matching] Tara Score:', taraScore);
 
-      const yoni1 = getYoni(moon1.nakshatra.index);
-      const yoni2 = getYoni(moon2.nakshatra.index);
+      const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
+      const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
       console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
 
       // Yoni scoring as per AstroSage
@@ -1679,8 +1687,8 @@ const server = http.createServer(async (req, res) => {
         }
       }
 
-      const gana1 = getGana(moon1.nakshatra.index);
-      const gana2 = getGana(moon2.nakshatra.index);
+      const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
+      const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
       let ganaScore = 0;
       if (gana1 === gana2) ganaScore = 6;
       else if ((gana1 === "Deva" && gana2 === "Manushya") || (gana1 === "Manushya" && gana2 === "Deva")) ganaScore = 6;
@@ -1697,8 +1705,9 @@ const server = http.createServer(async (req, res) => {
       const inauspiciousDistances = [2, 5, 6, 8, 9, 12];
       const bhakootScore = inauspiciousDistances.includes(signDistance) ? 0 : 7;
 
-      const nadi1 = getNadi(moon1.nakshatra.index);
-      const nadi2 = getNadi(moon2.nakshatra.index);
+      const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
+      const nadi2 = getNadiFromNakshatra(moon2.nakshatra.index);
+      console.log('[Matching] Nadi1:', nadi1, 'Nadi2:', nadi2);
       const nadiScore = nadi1 !== nadi2 ? 8 : 0;
 
       const totalScore = varnaScore + vashyaScore + taraScore + yoniScore + grahaMaitriScore + ganaScore + bhakootScore + nadiScore;
@@ -1982,6 +1991,3 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
-
-
-
