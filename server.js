@@ -1233,7 +1233,7 @@ function computeKundali(payload) {
     planets: enrichedPlanets.map((planet) => ({
       name: planet.name,
       longitude: planet.longitude,
-      degreeInSign: Number(planet.degreeInSign.toFixed(4)),
+      degreeInSign: Number(planet.degree.toFixed(4)),
       sign: planet.sign,
       house: planet.house,
       isRetrograde: planet.isRetrograde,
@@ -1982,4 +1982,5 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
