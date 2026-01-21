@@ -557,39 +557,39 @@ function calculateMangalDosha(planets, ascDegree) {
 
 function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  const yonis = ["Horse", "Elephant", "Sheep", "Snake", "Dog", "Cat", "Rat", "Cow",
-    "Buffalo", "Tiger", "Deer", "Monkey", "Lion", "Mongoose"];
-  // Correct yoni mapping for all 27 nakshatras
-  const yoniMap = [
-    0, 1, 2, 3, 4, 5, 6, 7,      // 1-8: Ashwini to Pushya
-    8, 9, 10, 7, 11, 12, 11, 12, // 9-16: Ashlesha to Vishakha  
-    13, 13, 4, 10, 10, 10,       // 17-22: Anuradha to Shravana
-    9, 0, 9, 9, 1                // 23-27: Dhanishta to Revati
+  const yonis = [
+    "Horse", "Elephant", "Sheep", "Serpent", "Serpent", "Dog", "Cat", "Sheep", "Cat",
+    "Rat", "Rat", "Cow", "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer",
+    "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse", "Lion", "Cow", "Elephant"
   ];
-  return yonis[yoniMap[nakIndex - 1]];
+  return yonis[nakIndex - 1] || "Unknown";
 }
 
 function getGanaFromNakshatra(nakIndex) {
-  const ganaMap = [0, 0, 1, 1, 0, 2, 0, 2, 2, 2, 0, 0, 1, 1, 2, 0, 0, 2, 2, 0, 0, 1, 1, 2, 0, 0, 0];
-  const ganas = ["Deva", "Manushya", "Rakshasa"];
-  return ganas[ganaMap[nakIndex - 1]];
+  if (!nakIndex) return "Unknown";
+  const ganas = [
+    "Deva", "Manushya", "Rakshasa", "Manushya", "Deva", "Manushya", "Deva", "Deva", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Deva", "Rakshasa", "Deva", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Deva"
+  ];
+  return ganas[nakIndex - 1] || "Unknown";
 }
 
 function getNadiFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  const nadis = ["Adi", "Madhya", "Antya"];
-  return nadis[(nakIndex - 1) % 3];
+  const nadis = [
+    "Adi", "Madhya", "Antya", "Adi", "Madhya", "Antya", "Adi", "Madhya", "Antya",
+    "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi",
+    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya"
+  ];
+  return nadis[nakIndex - 1] || "Unknown";
 }
 
 function getTara(nak1, nak2) {
   if (!nak1 || !nak2) return "Unknown";
-  // Correct Tara calculation: count from nak1 to nak2 inclusive
-  let count = ((nak2 - nak1 + 27) % 27) + 1;
-
-  // Tara repeats every 9 nakshatras
+  const count = ((nak2 - nak1 + 27) % 27) + 1;
   const taraIndex = (count - 1) % 9;
-  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhaka", "Vadha", "Mitra", "Ati Mitra"];
-
+  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
   return taraNames[taraIndex];
 }
 
@@ -1636,65 +1636,86 @@ const server = http.createServer(async (req, res) => {
 
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
-      console.log('[Matching] Tara1 (Boy to Girl):', tara1, 'Tara2 (Girl to Boy):', tara2);
-      const goodTaras = ["Sadhaka", "Mitra", "Ati Mitra", "Sampat", "Kshema"];
-      // If both have good Taras, give full 3 points
-      const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 :
-        (goodTaras.includes(tara1) || goodTaras.includes(tara2)) ? 1.5 : 0;
+      console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
+      const goodTaras = ["Sampat", "Kshema", "Sadhak", "Mitra", "Ati-Mitra"];
+
+      const tara1Score = goodTaras.includes(tara1) ? 1.5 : 0;
+      const tara2Score = goodTaras.includes(tara2) ? 1.5 : 0;
+      let taraScore = tara1Score + tara2Score;
+
+      // Special case for Janma Tara if Nakshatras belong to same sign but different padas
+      if (tara1 === "Janma" && tara2 === "Janma") {
+        if (moon1.sign === moon2.sign && moon1.nakshatra.name !== moon2.nakshatra.name) {
+          taraScore = 3;
+        }
+      }
+
       console.log('[Matching] Tara Score:', taraScore);
 
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
       console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
 
-      // Yoni scoring as per AstroSage
+      // Comprehensive Yoni compatibility table to match AstroSage
       const yoniCompatibility = {
-        "Horse-Mare": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Snake-Snake": 4,
+        // Same Yoni
+        "Horse-Horse": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Serpent-Serpent": 4,
         "Dog-Dog": 4, "Cat-Cat": 4, "Rat-Rat": 4, "Cow-Cow": 4, "Buffalo-Buffalo": 4,
-        "Tiger-Tiger": 4, "Deer-Deer": 4, "Monkey-Monkey": 4, "Mongoose-Mongoose": 4, "Lion-Lion": 4,
-        "Horse-Horse": 4, "Mare-Mare": 4,
-        // Friendly pairs
+        "Tiger-Tiger": 4, "Deer-Deer": 4, "Monkey-Monkey": 4, "Lion-Lion": 4, "Mongoose-Mongoose": 4,
+        // Specific Pairs
         "Cow-Buffalo": 3, "Buffalo-Cow": 3,
         "Elephant-Sheep": 3, "Sheep-Elephant": 3,
-        // Enemy pairs
+        "Horse-Elephant": 2, "Elephant-Horse": 2,
+        "Serpent-Rat": 2, "Rat-Serpent": 2,
+        "Dog-Cat": 2, "Cat-Dog": 2,
+        "Horse-Dog": 2, "Dog-Horse": 2,
+        "Tiger-Lion": 2, "Lion-Tiger": 2,
+        "Buffalo-Sheep": 2, "Sheep-Buffalo": 2,
+        "Snake-Dog": 2, "Dog-Snake": 2,
+        // Enemy Pairs
         "Horse-Buffalo": 0, "Buffalo-Horse": 0,
         "Elephant-Lion": 0, "Lion-Elephant": 0,
-        "Snake-Mongoose": 0, "Mongoose-Snake": 0,
-        "Monkey-Sheep": 0, "Sheep-Monkey": 0,
+        "Sheep-Monkey": 0, "Monkey-Sheep": 0,
+        "Serpent-Mongoose": 0, "Mongoose-Serpent": 0,
         "Dog-Deer": 0, "Deer-Dog": 0,
         "Cat-Rat": 0, "Rat-Cat": 0,
-        "Cow-Tiger": 0, "Tiger-Cow": 0
+        "Cow-Tiger": 0, "Tiger-Cow": 0,
+        "Monkey-Tiger": 0, "Tiger-Monkey": 0,
+        "Deer-Horse": 0, "Horse-Deer": 0,
+        "Mongoose-Rat": 0, "Rat-Mongoose": 0
       };
 
       const yoniKey = `${yoni1}-${yoni2}`;
       let yoniScore = yoniCompatibility[yoniKey];
       if (yoniScore === undefined) {
-        // If not in table, check if same (but only if not Unknown)
         if (yoni1 === "Unknown" || yoni2 === "Unknown") yoniScore = 0;
-        else yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default: same=4, different=2
+        else yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default
       }
       console.log('[Matching] Yoni Score:', yoniScore, 'for', yoniKey);
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
       let grahaMaitriScore = 0;
+
+      const lordIndexMap = { "Sun": 0, "Moon": 1, "Mars": 2, "Mercury": 3, "Jupiter": 4, "Venus": 5, "Saturn": 6 };
+
+      const maitriMatrix = [
+        [5, 5, 5, 4, 5, 0, 0], // Sun
+        [5, 5, 4, 5, 4, 4, 4], // Moon
+        [5, 5, 5, 0, 5, 4, 4], // Mars
+        [5, 0, 4, 5, 4, 5, 4], // Mercury
+        [5, 5, 5, 0, 5, 0, 4], // Jupiter
+        [0, 0, 4, 5, 4, 5, 5], // Venus
+        [0, 0, 0, 5, 4, 5, 5]  // Saturn
+      ];
+
       if (lord1 === lord2) {
         grahaMaitriScore = 5;
       } else {
-        const friendships = {
-          "Sun": ["Moon", "Mars", "Jupiter"],
-          "Moon": ["Sun", "Mercury"],
-          "Mars": ["Sun", "Moon", "Jupiter"],
-          "Mercury": ["Sun", "Venus"],
-          "Jupiter": ["Sun", "Moon", "Mars"],
-          "Venus": ["Mercury", "Saturn"],
-          "Saturn": ["Mercury", "Venus"]
-        };
-        // Check if they are friends (bidirectional)
-        const areFriends = (friendships[lord1] && friendships[lord1].includes(lord2)) ||
-          (friendships[lord2] && friendships[lord2].includes(lord1));
-        if (areFriends) {
-          grahaMaitriScore = 5;  // Changed from 4 to 5 for friends
+        const i1 = lordIndexMap[lord1];
+        const i2 = lordIndexMap[lord2];
+        if (i1 !== undefined && i2 !== undefined) {
+          grahaMaitriScore = (maitriMatrix[i1][i2] + maitriMatrix[i2][i1]) / 2;
         } else {
           grahaMaitriScore = 0.5;
         }
@@ -1704,19 +1725,30 @@ const server = http.createServer(async (req, res) => {
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
       let ganaScore = 0;
       if (gana1 === gana2) ganaScore = 6;
-      else if ((gana1 === "Deva" && gana2 === "Manushya") || (gana1 === "Manushya" && gana2 === "Deva")) ganaScore = 6;
-      else if ((gana1 === "Manushya" && gana2 === "Rakshasa") || (gana1 === "Rakshasa" && gana2 === "Manushya")) ganaScore = 0;
-      else ganaScore = 0;
+      else if (gana1 === "Deva" && gana2 === "Manushya") ganaScore = 6;
+      else if (gana1 === "Manushya" && gana2 === "Deva") ganaScore = 5;
+      else if (gana1 === "Deva" && gana2 === "Rakshasa") ganaScore = 1;
+      else if (gana1 === "Rakshasa" && gana2 === "Deva") ganaScore = 0;
+      else if (gana1 === "Manushya" && gana2 === "Rakshasa") ganaScore = 0;
+      else if (gana1 === "Rakshasa" && gana2 === "Manushya") ganaScore = 0;
 
       // Bhakoot - sign compatibility (AstroSage method)
       const getSignIndex = (sign) => RASHIS.indexOf(sign);
       const sign1Index = getSignIndex(moon1.sign);
       const sign2Index = getSignIndex(moon2.sign);
-      // Calculate the distance from boy's sign to girl's sign (counting forward)
       const signDistance = ((sign2Index - sign1Index + 12) % 12) + 1;
-      // Inauspicious distances: 2-12, 5-9, 6-8 (from boy to girl)
       const inauspiciousDistances = [2, 5, 6, 8, 9, 12];
-      const bhakootScore = inauspiciousDistances.includes(signDistance) ? 0 : 7;
+
+      let bhakootScore = inauspiciousDistances.includes(signDistance) ? 0 : 7;
+
+      // Bhakoot Cancellation (Dosha Parihar)
+      if (bhakootScore === 0) {
+        const lord1 = getRasiLord(moon1.sign);
+        const lord2 = getRasiLord(moon2.sign);
+        if (lord1 === lord2) {
+          bhakootScore = 7; // Cancelled if sign lords are same
+        }
+      }
 
       const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
       const nadi2 = getNadiFromNakshatra(moon2.nakshatra.index);
@@ -1749,6 +1781,7 @@ const server = http.createServer(async (req, res) => {
         maxScore: 36,
         percentage: Math.round((totalScore / 36) * 100),
         compatibility: totalScore >= 28 ? "Excellent" : totalScore >= 24 ? "Very Good" : totalScore >= 18 ? "Good" : "Average",
+        totalDisplayScore: (Math.round(totalScore * 10) / 10).toFixed(1), // Added for clarity
         details: [
           { name: "Varna (वर्ण)", boyValue: varna1, girlValue: varna2, score: varnaScore, maxScore: 1, areaOfLife: "Work", description: "Spiritual compatibility and ego levels" },
           { name: "Vashya (वश्य)", boyValue: vashya1, girlValue: vashya2, score: vashyaScore, maxScore: 2, areaOfLife: "Dominance", description: "Mutual attraction and control" },
@@ -2004,5 +2037,6 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
