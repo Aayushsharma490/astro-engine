@@ -14,7 +14,7 @@ const path = require("path");
 const fs = require("fs");
 const sweph = require("sweph");
 
-const PORT = Number(process.env.PORT || process.env.ASTRO_ENGINE_PORT || 5005);
+const PORT = Number(process.env.ASTRO_ENGINE_PORT || 5005);
 const EPHE_PATH =
   process.env.SWE_EPHE_PATH ||
   path.resolve(__dirname, "swisseph-master", "ephe");
@@ -159,39 +159,6 @@ const NAKSHATRA_LORDS = [
 ];
 
 const BENEFIC_PLANETS = new Set(["Jupiter", "Venus", "Mercury", "Moon"]);
-
-const YONI_MATRIX = {
-  "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
-  "Gaja": { "Ashwa": 2, "Gaja": 4, "Mesha": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
-  "Mesha": { "Ashwa": 2, "Gaja": 3, "Mesha": 4, "Sarpa": 2, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 0, "Simha": 1, "Nakul": 2 },
-  "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 0 },
-  "Shwan": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-  "Marjar": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-  "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
-  "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-  "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-  "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
-  "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 2, "Nakul": 2 },
-  "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
-  "Simha": { "Ashwa": 1, "Gaja": 0, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 2, "Vanar": 3, "Simha": 4, "Nakul": 2 },
-  "Nakul": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
-};
-
-const GANA_SCORING = {
-  "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 1 },
-  "Manushya": { "Devta": 5, "Manushya": 6, "Rakshasa": 0 },
-  "Rakshasa": { "Devta": 0, "Manushya": 0, "Rakshasa": 6 }
-};
-
-const MAITRI_SCORES = {
-  "Sun": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 4, "Jupiter": 5, "Venus": 0, "Saturn": 0 },
-  "Moon": { "Sun": 5, "Moon": 5, "Mars": 4, "Mercury": 5, "Jupiter": 4, "Venus": 4, "Saturn": 4 },
-  "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3.5, "Saturn": 3.5 },
-  "Mercury": { "Sun": 5, "Moon": 0, "Mars": 4, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 4 },
-  "Jupiter": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0.5, "Jupiter": 5, "Venus": 0.5, "Saturn": 4 },
-  "Venus": { "Sun": 0, "Moon": 0, "Mars": 3.5, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 5 },
-  "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
-};
 
 const PLANET_CONFIG = [
   { id: constants.SE_SUN, name: "Sun" },
@@ -488,26 +455,6 @@ function formatDateParts(date) {
   };
 }
 
-function getNadiFromNakshatra(nakIndex) {
-  if (!nakIndex) return "Unknown";
-  // Groups: 1, 6, 7, 12, 13, 18, 19, 24, 25 -> Adi
-  const adi = [1, 6, 7, 12, 13, 18, 19, 24, 25];
-  const madhya = [2, 5, 8, 11, 14, 17, 20, 23, 26];
-  const antya = [3, 4, 9, 10, 15, 16, 21, 22, 27];
-  if (adi.includes(nakIndex)) return "Adi";
-  if (madhya.includes(nakIndex)) return "Madhya";
-  if (antya.includes(nakIndex)) return "Antya";
-  return "Unknown";
-}
-
-function getTara(nak1, nak2) {
-  if (!nak1 || !nak2) return "Unknown";
-  const count = ((nak2 - nak1 + 27) % 27) + 1;
-  const taraIndex = (count - 1) % 9;
-  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
-  return taraNames[taraIndex];
-}
-
 // ===== PANCHANG CALCULATION FUNCTIONS =====
 
 function calculateTithi(sunLong, moonLong) {
@@ -598,26 +545,22 @@ function calculateMasa(moonLong, sunLong) {
 
 function calculateMangalDosha(planets, ascDegree) {
   const mars = planets.find(p => p.name === "Mars");
-  if (!mars) return "No Mangal Dosha";
+  if (!mars) return "No";
 
   const house = houseFromAscendant(mars.longitude, ascDegree);
-  // Mangal Dosha exists if Mars is in houses 1, 4, 7, 8, or 12 (High) or 2 (Low)
-  if ([1, 4, 7, 8, 12].includes(house)) {
-    return "High Mangal Dosha";
+  // Mangal Dosha exists if Mars is in houses 1, 2, 4, 7, 8, or 12
+  if ([1, 2, 4, 7, 8, 12].includes(house)) {
+    return "Yes";
   }
-  if (house === 2) {
-    return "Low Mangal Dosha";
-  }
-  return "No Mangal Dosha";
+  return "No";
 }
 
 function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  // AstroSage style Yoni names
   const yonis = [
-    "Ashwa", "Gaja", "Mesha", "Sarpa", "Sarpa", "Shwan", "Marjar", "Mesha", "Marjar",
-    "Mushak", "Mushak", "Gau", "Mahish", "Vyaghra", "Mahish", "Vyaghra", "Mriga", "Mriga",
-    "Shwan", "Vanar", "Nakul", "Vanar", "Simha", "Ashwa", "Simha", "Gau", "Gaja"
+    "Horse", "Elephant", "Sheep", "Serpent", "Serpent", "Dog", "Cat", "Sheep", "Cat",
+    "Rat", "Rat", "Cow", "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer",
+    "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse", "Lion", "Cow", "Elephant"
   ];
   return yonis[nakIndex - 1] || "Unknown";
 }
@@ -625,54 +568,40 @@ function getYoniFromNakshatra(nakIndex) {
 function getGanaFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
   const ganas = [
-    "Devta", "Manushya", "Rakshasa", "Manushya", "Devta", "Manushya", "Devta", "Devta", "Rakshasa",
-    "Rakshasa", "Manushya", "Manushya", "Devta", "Rakshasa", "Devta", "Rakshasa", "Devta", "Rakshasa",
-    "Rakshasa", "Manushya", "Manushya", "Devta", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Devta"
+    "Deva", "Manushya", "Rakshasa", "Manushya", "Deva", "Manushya", "Deva", "Deva", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Deva", "Rakshasa", "Deva", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Deva"
   ];
   return ganas[nakIndex - 1] || "Unknown";
 }
 
-function isFriend(p1, p2) {
-  const friends = {
-    "Sun": ["Moon", "Mars", "Jupiter"],
-    "Moon": ["Sun", "Mercury"],
-    "Mars": ["Sun", "Moon", "Jupiter"],
-    "Mercury": ["Sun", "Venus"],
-    "Jupiter": ["Sun", "Moon", "Mars"],
-    "Venus": ["Mercury", "Saturn"],
-    "Saturn": ["Mercury", "Venus"]
-  };
-  return p1 === p2 || (friends[p1] && friends[p1].includes(p2));
+function getNadiFromNakshatra(nakIndex) {
+  if (!nakIndex) return "Unknown";
+  // Pattern: Adi, Madhya, Antya, Antya, Madhya, Adi (Snake pattern)
+  const nadis = [
+    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya",
+    "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi",
+    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya"
+  ];
+  return nadis[nakIndex - 1] || "Unknown";
+}
+
+function getTara(nak1, nak2) {
+  if (!nak1 || !nak2) return "Unknown";
+  const count = ((nak2 - nak1 + 27) % 27) + 1;
+  const taraIndex = (count - 1) % 9;
+  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
+  return taraNames[taraIndex];
 }
 
 function getVarnaFromSign(sign) {
   const varnas = {
     "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
     "Aries": "Kshatriya", "Leo": "Kshatriya", "Sagittarius": "Kshatriya",
-    "Taurus": "Vaisya", "Virgo": "Vaisya", "Capricorn": "Vaisya",
-    "Gemini": "Sudra", "Libra": "Sudra", "Aquarius": "Sudra"
+    "Taurus": "Vaishya", "Virgo": "Vaishya", "Capricorn": "Vaishya",
+    "Gemini": "Shudra", "Libra": "Shudra", "Aquarius": "Shudra"
   };
   return varnas[sign] || "Unknown";
-}
-
-function getVashya(moonSign) {
-  const vashyas = {
-    "Aries": "Chatu", "Taurus": "Chatu", "Leo": "Chatu",
-    "Gemini": "Manav", "Virgo": "Manav", "Libra": "Manav", "Aquarius": "Manav", "Sagittarius": "Manav",
-    "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
-    "Scorpio": "Keeta"
-  };
-  return vashyas[moonSign] || "Unknown";
-}
-
-function getRasiLord(moonSign) {
-  const lords = {
-    "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
-    "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
-    "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
-    "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
-  };
-  return lords[moonSign] || "Unknown";
 }
 
 function getNakshatraPaya(nakIndex) {
@@ -742,8 +671,228 @@ function getLuckyNumbers(rashi) {
 }
 
 // ============================================================================
-// PHALLIT (PREDICTIONS) ANALYSIS FUNCTIONS
+// PHALLIT ANALYSIS FUNCTIONS - Bilingual Predictions
 // ============================================================================
+
+function analyzeLagnaPersonality(lagna, planets, lang) {
+  const traits = {
+    "Aries": { en: "Dynamic, energetic, and pioneering. Natural leader with courage and initiative.", hi: "गतिशील, ऊर्जावान और अग्रणी। साहस और पहल के साथ स्वाभाविक नेता।" },
+    "Taurus": { en: "Stable, practical, and determined. Values security and material comforts.", hi: "स्थिर, व्यावहारिक और दृढ़। सुरक्षा और भौतिक सुख-सुविधाओं को महत्व देते हैं।" },
+    "Gemini": { en: "Communicative, versatile, and intellectual. Quick-witted with diverse interests.", hi: "संवादी, बहुमुखी और बुद्धिमान। विविध रुचियों के साथ तेज-तर्रार।" },
+    "Cancer": { en: "Emotional, nurturing, and intuitive. Strong family bonds and protective nature.", hi: "भावुक, पालन-पोषण करने वाले और सहज। मजबूत पारिवारिक बंधन और सुरक्षात्मक स्वभाव।" },
+    "Leo": { en: "Confident, charismatic, and creative. Natural performer with strong leadership.", hi: "आत्मविश्वासी, करिश्माई और रचनात्मक। मजबूत नेतृत्व के साथ स्वाभाविक कलाकार।" },
+    "Virgo": { en: "Analytical, detail-oriented, and service-minded. Perfectionist with practical approach.", hi: "विश्लेषणात्मक, विस्तार-उन्मुख और सेवा-भावी। व्यावहारिक दृष्टिकोण के साथ पूर्णतावादी।" },
+    "Libra": { en: "Diplomatic, balanced, and artistic. Values harmony and relationships.", hi: "कूटनीतिक, संतुलित और कलात्मक। सद्भाव और रिश्तों को महत्व देते हैं।" },
+    "Scorpio": { en: "Intense, passionate, and transformative. Deep emotional nature with strong willpower.", hi: "तीव्र, भावुक और परिवर्तनकारी। मजबूत इच्छाशक्ति के साथ गहरी भावनात्मक प्रकृति।" },
+    "Sagittarius": { en: "Optimistic, philosophical, and adventurous. Love for freedom and higher knowledge.", hi: "आशावादी, दार्शनिक और साहसी। स्वतंत्रता और उच्च ज्ञान के लिए प्रेम।" },
+    "Capricorn": { en: "Ambitious, disciplined, and responsible. Goal-oriented with strong work ethic.", hi: "महत्वाकांक्षी, अनुशासित और जिम्मेदार। मजबूत कार्य नैतिकता के साथ लक्ष्य-उन्मुख।" },
+    "Aquarius": { en: "Innovative, humanitarian, and independent. Progressive thinker with unique ideas.", hi: "नवीन, मानवतावादी और स्वतंत्र। अनोखे विचारों के साथ प्रगतिशील विचारक।" },
+    "Pisces": { en: "Compassionate, intuitive, and artistic. Spiritual nature with deep empathy.", hi: "दयालु, सहज और कलात्मक। गहरी सहानुभूति के साथ आध्यात्मिक प्रकृति।" }
+  };
+  return traits[lagna]?.[lang] || (lang === 'en' ? 'Personality analysis based on your ascendant sign.' : 'आपके लग्न राशि के आधार पर व्यक्तित्व विश्लेषण।');
+}
+
+function analyzeMoonEmotions(moonSign, moonData, lang) {
+  const emotions = {
+    "Aries": { en: "Quick emotional responses, passionate feelings. Need for action and independence.", hi: "त्वरित भावनात्मक प्रतिक्रियाएं, भावुक भावनाएं। कार्रवाई और स्वतंत्रता की आवश्यकता।" },
+    "Taurus": { en: "Stable emotions, need for security. Comfort-seeking and loyal in relationships.", hi: "स्थिर भावनाएं, सुरक्षा की आवश्यकता। आराम की तलाश और रिश्तों में वफादार।" },
+    "Gemini": { en: "Changeable moods, intellectual emotions. Need for communication and variety.", hi: "परिवर्तनशील मनोदशा, बौद्धिक भावनाएं। संचार और विविधता की आवश्यकता।" },
+    "Cancer": { en: "Deep emotions, nurturing instincts. Strong attachment to home and family.", hi: "गहरी भावनाएं, पालन-पोषण की प्रवृत्ति। घर और परिवार से मजबूत लगाव।" },
+    "Leo": { en: "Warm-hearted, generous emotions. Need for recognition and appreciation.", hi: "गर्मजोशी, उदार भावनाएं। मान्यता और प्रशंसा की आवश्यकता।" },
+    "Virgo": { en: "Analytical emotions, practical care. Service-oriented with attention to detail.", hi: "विश्लेषणात्मक भावनाएं, व्यावहारिक देखभाल। विस्तार पर ध्यान के साथ सेवा-उन्मुख।" },
+    "Libra": { en: "Balanced emotions, need for harmony. Relationship-focused and diplomatic.", hi: "संतुलित भावनाएं, सद्भाव की आवश्यकता। रिश्ते-केंद्रित और कूटनीतिक।" },
+    "Scorpio": { en: "Intense emotions, deep feelings. Transformative experiences and strong intuition.", hi: "तीव्र भावनाएं, गहरी भावनाएं। परिवर्तनकारी अनुभव और मजबूत अंतर्ज्ञान।" },
+    "Sagittarius": { en: "Optimistic emotions, philosophical outlook. Need for freedom and adventure.", hi: "आशावादी भावनाएं, दार्शनिक दृष्टिकोण। स्वतंत्रता और रोमांच की आवश्यकता।" },
+    "Capricorn": { en: "Controlled emotions, practical approach. Responsible and goal-oriented feelings.", hi: "नियंत्रित भावनाएं, व्यावहारिक दृष्टिकोण। जिम्मेदार और लक्ष्य-उन्मुख भावनाएं।" },
+    "Aquarius": { en: "Detached emotions, humanitarian feelings. Independent and progressive mindset.", hi: "अलग भावनाएं, मानवतावादी भावनाएं। स्वतंत्र और प्रगतिशील मानसिकता।" },
+    "Pisces": { en: "Empathetic emotions, spiritual feelings. Compassionate and imaginative nature.", hi: "सहानुभूतिपूर्ण भावनाएं, आध्यात्मिक भावनाएं। दयालु और कल्पनाशील प्रकृति।" }
+  };
+  return emotions[moonSign]?.[lang] || (lang === 'en' ? 'Emotional nature based on Moon sign.' : 'चंद्र राशि के आधार पर भावनात्मक प्रकृति।');
+}
+
+function analyzeEducation(planets, lagna, lang) {
+  if (lang === 'en') {
+    return "Education prospects are favorable. Focus on subjects that interest you. Jupiter and Mercury influence learning abilities. Higher education recommended for career growth.";
+  } else {
+    return "शिक्षा की संभावनाएं अनुकूल हैं। उन विषयों पर ध्यान दें जो आपको रुचिकर लगते हैं। बृहस्पति और बुध सीखने की क्षमताओं को प्रभावित करते हैं। करियर विकास के लिए उच्च शिक्षा की सिफारिश की जाती है।";
+  }
+}
+
+function analyzeCareer(planets, lagna, lang) {
+  if (lang === 'en') {
+    return "Career success through hard work and dedication. Leadership roles suit you. Business or service sector both favorable. Mid-career growth expected. Saturn and Sun influence professional life.";
+  } else {
+    return "कड़ी मेहनत और समर्पण के माध्यम से करियर में सफलता। नेतृत्व की भूमिकाएं आपके अनुकूल हैं। व्यवसाय या सेवा क्षेत्र दोनों अनुकूल हैं। मध्य-करियर विकास की उम्मीद है। शनि और सूर्य पेशेवर जीवन को प्रभावित करते हैं।";
+  }
+}
+
+function analyzeWealth(planets, lagna, lang) {
+  if (lang === 'en') {
+    return "Financial stability through consistent efforts. Multiple income sources possible. Property and investments bring gains. Venus and Jupiter influence wealth. Save for long-term security.";
+  } else {
+    return "निरंतर प्रयासों के माध्यम से वित्तीय स्थिरता। कई आय स्रोत संभव हैं। संपत्ति और निवेश लाभ लाते हैं। शुक्र और बृहस्पति धन को प्रभावित करते हैं। दीर्घकालिक सुरक्षा के लिए बचत करें।";
+  }
+}
+
+function analyzeRelationships(planets, lagna, mangalDosha, lang) {
+  if (lang === 'en') {
+    return `Marriage prospects are ${mangalDosha === 'No' ? 'favorable' : 'moderate'}. ${mangalDosha !== 'No' ? 'Mangal Dosha present - consult astrologer for remedies. ' : ''}Partner compatibility important. Venus influences love life. Family support strong. Communication key to harmony.`;
+  } else {
+    return `विवाह की संभावनाएं ${mangalDosha === 'No' ? 'अनुकूल' : 'मध्यम'} हैं। ${mangalDosha !== 'No' ? 'मंगल दोष उपस्थित - उपायों के लिए ज्योतिषी से परामर्श करें। ' : ''}साथी अनुकूलता महत्वपूर्ण है। शुक्र प्रेम जीवन को प्रभावित करता है। पारिवारिक समर्थन मजबूत है। सद्भाव की कुंजी संचार है।`;
+  }
+}
+
+function analyzeHealth(planets, lagna, lang) {
+  if (lang === 'en') {
+    return "Overall health good with proper care. Watch for stress-related issues. Regular exercise recommended. Digestive system needs attention. Moon and Mars influence vitality. Maintain work-life balance.";
+  } else {
+    return "उचित देखभाल के साथ समग्र स्वास्थ्य अच्छा है। तनाव से संबंधित मुद्दों पर ध्यान दें। नियमित व्यायाम की सिफारिश की जाती है। पाचन तंत्र पर ध्यान देने की आवश्यकता है। चंद्रमा और मंगल जीवन शक्ति को प्रभावित करते हैं। कार्य-जीवन संतुलन बनाए रखें।";
+  }
+}
+
+function analyzeDoshasYogas(planets, mangalDosha, lang) {
+  if (lang === 'en') {
+    return `Mangal Dosha: ${mangalDosha}. ${mangalDosha !== 'No' ? 'Remedies recommended for harmonious married life. ' : ''}Beneficial yogas present for success. Planetary combinations favor growth. Consult expert for detailed yoga analysis.`;
+  } else {
+    return `मंगल दोष: ${mangalDosha}। ${mangalDosha !== 'No' ? 'सुखी वैवाहिक जीवन के लिए उपायों की सिफारिश की जाती है। ' : ''}सफलता के लिए लाभकारी योग उपस्थित हैं। ग्रह संयोजन विकास के पक्ष में हैं। विस्तृत योग विश्लेषण के लिए विशेषज्ञ से परामर्श करें।`;
+  }
+}
+
+function analyzeDashaPredictions(vimshottariDasha, planets, lang) {
+  const currentDasha = vimshottariDasha.currentDasha.planet;
+  if (lang === 'en') {
+    return `Currently running ${currentDasha} Mahadasha. This period brings ${currentDasha}-related experiences. Focus on ${currentDasha}'s significations for best results. Next 5-10 years show progressive growth. Plan major decisions according to dasha periods.`;
+  } else {
+    return `वर्तमान में ${currentDasha} महादशा चल रही है। यह अवधि ${currentDasha} से संबंधित अनुभव लाती है। सर्वोत्तम परिणामों के लिए ${currentDasha} के संकेतों पर ध्यान दें। अगले 5-10 वर्ष प्रगतिशील विकास दिखाते हैं। दशा अवधि के अनुसार प्रमुख निर्णयों की योजना बनाएं।`;
+  }
+}
+
+function generateRemedies(planets, mangalDosha, lang) {
+  if (lang === 'en') {
+    return `Recommended remedies: ${mangalDosha !== 'No' ? 'For Mangal Dosha - worship Lord Hanuman on Tuesdays. ' : ''}Chant mantras of weak planets. Donate to charity on auspicious days. Wear recommended gemstones after consultation. Practice meditation and yoga for balance.`;
+  } else {
+    return `अनुशंसित उपाय: ${mangalDosha !== 'No' ? 'मंगल दोष के लिए - मंगलवार को हनुमान जी की पूजा करें। ' : ''}कमजोर ग्रहों के मंत्रों का जाप करें। शुभ दिनों पर दान करें। परामर्श के बाद अनुशंसित रत्न पहनें। संतुलन के लिए ध्यान और योग का अभ्यास करें।`;
+  }
+}
+
+// ============================================================================
+
+
+function calculateVimshottari(moonDegree, birthUtcDate) {
+  const nakDetails = calculateNakshatra(moonDegree);
+  const vimshottariSequence = [
+    "Ketu",
+    "Venus",
+    "Sun",
+    "Moon",
+    "Mars",
+    "Rahu",
+    "Jupiter",
+    "Saturn",
+    "Mercury",
+  ];
+  const durations = {
+    Ketu: 7,
+    Venus: 20,
+    Sun: 6,
+    Moon: 10,
+    Mars: 7,
+    Rahu: 18,
+    Jupiter: 16,
+    Saturn: 19,
+    Mercury: 17,
+  };
+
+  const startingLord = NAKSHATRA_LORDS[nakDetails.index - 1];
+  const startIndex = vimshottariSequence.indexOf(startingLord);
+  const remainingFraction = 1 - nakDetails.fraction;
+  const remainingYears = durations[startingLord] * remainingFraction;
+
+  const dashas = [];
+  console.log(
+    "[astro-engine] birthUtcDate for Vimshottari:",
+    birthUtcDate,
+    typeof birthUtcDate
+  );
+  let cursor = new Date(birthUtcDate);
+  console.log(
+    "[astro-engine] cursor Date object:",
+    cursor,
+    "isValid:",
+    !isNaN(cursor.getTime())
+  );
+
+  if (isNaN(cursor.getTime())) {
+    throw new Error(
+      `Invalid date passed to calculateVimshottari: ${birthUtcDate}`
+    );
+  }
+
+  let currentIndex = startIndex;
+  let spanYears = remainingYears;
+
+  console.log(`[astro-engine] Starting loop for 12 mahadashas. remainingYears: ${remainingYears}`);
+
+  for (let i = 0; i < 12; i += 1) {
+    try {
+      const lord = vimshottariSequence[currentIndex % vimshottariSequence.length];
+      const startDate = new Date(cursor);
+      const endDate = new Date(
+        startDate.getTime() + spanYears * 365.2425 * 24 * 3600 * 1000
+      );
+
+      // Calculate Antardashas (Sub-periods)
+      const antardashas = [];
+      let adCursor = new Date(startDate);
+      const mahadashaLordIndex = vimshottariSequence.indexOf(lord);
+
+      for (let j = 0; j < 9; j++) {
+        const adLord = vimshottariSequence[(mahadashaLordIndex + j) % 9];
+        const adDurationYears = (durations[lord] * durations[adLord]) / 120;
+
+        const adEndDate = new Date(
+          adCursor.getTime() + adDurationYears * 365.2425 * 24 * 3600 * 1000
+        );
+
+        antardashas.push({
+          planet: adLord,
+          startDate: adCursor.toISOString().split("T")[0],
+          endDate: adEndDate.toISOString().split("T")[0],
+          years: Number(adDurationYears.toFixed(4))
+        });
+
+        adCursor = adEndDate;
+      }
+
+      dashas.push({
+        planet: lord,
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+        years: Number(spanYears.toFixed(2)),
+        antardashas: antardashas
+      });
+      cursor = endDate;
+      currentIndex += 1;
+      spanYears =
+        durations[vimshottariSequence[currentIndex % vimshottariSequence.length]];
+    } catch (e) {
+      console.error(`[astro-engine] Error calculating mahadasha ${i}:`, e);
+      // Don't break the whole process if one dasha fails (though it shouldn't)
+      break;
+    }
+  }
+
+  console.log(`[astro-engine] Calculated ${dashas.length} mahadashas.`);
+
+  return {
+    current: dashas[0],
+    mahadashas: dashas,
+  };
+}
+
+// ============================================
+// PHALLIT (PREDICTIONS) ANALYSIS FUNCTIONS
+// ============================================
 
 // Helper: Get planet by name
 function getPlanetByName(planets, name) {
@@ -1029,160 +1178,6 @@ function generateRemedies(planets, mangalDosha, language) {
     return analysis;
   }
 }
-
-
-function calculateVimshottari(moonDegree, birthUtcDate) {
-  const nakDetails = calculateNakshatra(moonDegree);
-  const vimshottariSequence = [
-    "Ketu",
-    "Venus",
-    "Sun",
-    "Moon",
-    "Mars",
-    "Rahu",
-    "Jupiter",
-    "Saturn",
-    "Mercury",
-  ];
-  const durations = {
-    Ketu: 7,
-    Venus: 20,
-    Sun: 6,
-    Moon: 10,
-    Mars: 7,
-    Rahu: 18,
-    Jupiter: 16,
-    Saturn: 19,
-    Mercury: 17,
-  };
-
-  const startingLord = NAKSHATRA_LORDS[nakDetails.index - 1];
-  const startIndex = vimshottariSequence.indexOf(startingLord);
-  const remainingFraction = 1 - nakDetails.fraction;
-  const remainingYears = durations[startingLord] * remainingFraction;
-
-  const dashas = [];
-  console.log(
-    "[astro-engine] birthUtcDate for Vimshottari:",
-    birthUtcDate,
-    typeof birthUtcDate
-  );
-  let cursor = new Date(birthUtcDate);
-  console.log(
-    "[astro-engine] cursor Date object:",
-    cursor,
-    "isValid:",
-    !isNaN(cursor.getTime())
-  );
-
-  if (isNaN(cursor.getTime())) {
-    throw new Error(
-      `Invalid date passed to calculateVimshottari: ${birthUtcDate}`
-    );
-  }
-
-  let currentIndex = startIndex;
-  let spanYears = remainingYears;
-
-  console.log(`[astro-engine] Starting loop for 12 mahadashas. remainingYears: ${remainingYears}`);
-
-  for (let i = 0; i < 12; i += 1) {
-    try {
-      const lord = vimshottariSequence[currentIndex % vimshottariSequence.length];
-      const startDate = new Date(cursor);
-      const endDate = new Date(
-        startDate.getTime() + spanYears * 365.2425 * 24 * 3600 * 1000
-      );
-
-      // Calculate Antardashas (Sub-periods)
-      const antardashas = [];
-      let adCursor = new Date(startDate);
-      const mahadashaLordIndex = vimshottariSequence.indexOf(lord);
-
-      for (let j = 0; j < 9; j++) {
-        const adLord = vimshottariSequence[(mahadashaLordIndex + j) % 9];
-        const adDurationYears = (durations[lord] * durations[adLord]) / 120;
-
-        const adEndDate = new Date(
-          adCursor.getTime() + adDurationYears * 365.2425 * 24 * 3600 * 1000
-        );
-
-        antardashas.push({
-          planet: adLord,
-          startDate: adCursor.toISOString().split("T")[0],
-          endDate: adEndDate.toISOString().split("T")[0],
-          years: Number(adDurationYears.toFixed(4))
-        });
-
-        adCursor = adEndDate;
-      }
-
-      dashas.push({
-        planet: lord,
-        startDate: startDate.toISOString().split("T")[0],
-        endDate: endDate.toISOString().split("T")[0],
-        years: Number(spanYears.toFixed(2)),
-        antardashas: antardashas
-      });
-      cursor = endDate;
-      currentIndex += 1;
-      spanYears =
-        durations[vimshottariSequence[currentIndex % vimshottariSequence.length]];
-    } catch (e) {
-      console.error(`[astro-engine] Error calculating mahadasha ${i}:`, e);
-      // Don't break the whole process if one dasha fails (though it shouldn't)
-      break;
-    }
-  }
-
-  console.log(`[astro-engine] Calculated ${dashas.length} mahadashas.`);
-
-  return {
-    current: dashas[0],
-    mahadashas: dashas,
-  };
-}
-
-// ============================================
-// PHALLIT (PREDICTIONS) ANALYSIS FUNCTIONS
-// ============================================
-
-// Helper: Get planet by name
-// function getPlanetByName(planets, name) { /* ... already defined above ... */ }
-
-// Helper: Get house lord
-// function getHouseLord(houseNumber, ascendantSign) { /* ... already defined above ... */ }
-
-// 1. LAGNA PERSONALITY
-// function analyzeLagnaPersonality(ascSign, planets, language) { /* ... already defined above ... */ }
-
-// 2. MOON EMOTIONS
-// function analyzeMoonEmotions(moonSign, moon, language) { /* ... already defined above ... */ }
-
-// 3. EDUCATION
-// function analyzeEducation(planets, ascSign, language) { /* ... already defined above ... */ }
-
-// 4. CAREER (MOST IMPORTANT)
-// function analyzeCareer(planets, ascSign, language) { /* ... already defined above ... */ }
-
-// 5. WEALTH
-// function analyzeWealth(planets, ascSign, language) { /* ... already defined above ... */ }
-
-// 6. RELATIONSHIPS
-// function analyzeRelationships(planets, ascSign, mangalDosha, language) { /* ... already defined above ... */ }
-
-// 7. HEALTH
-// function analyzeHealth(planets, ascSign, language) { /* ... already defined above ... */ }
-
-// 8. DOSHAS & YOGAS
-// function analyzeDoshasYogas(planets, mangalDosha, language) { /* ... already defined above ... */ }
-
-// 9. DASHA PREDICTIONS
-// function analyzeDashaPredictions(dashas, planets, language) { /* ... already defined above ... */ }
-
-// 10. REMEDIES
-// function generateRemedies(planets, mangalDosha, language) { /* ... already defined above ... */ }
-
 
 function computeKundali(payload) {
   const inputs = validateInput(payload);
@@ -1547,30 +1542,30 @@ function computeKundali(payload) {
             en: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'en'),
             hi: generateRemedies(enrichedPlanets, calculateMangalDosha(enrichedPlanets, ascDegree), 'hi')
           },
-          // NEW: भाव फल - 12 Houses Analysis (Simplified)
+          // NEW: भाव फल - 12 Houses Analysis
           bhavPhal: {
-            house1: { en: 'House 1 (Self): Strong personality and good health indicated. Leadership qualities present.', hi: 'प्रथम भाव (स्वयं): मजबूत व्यक्तित्व और अच्छा स्वास्थ्य संकेत। नेतृत्व गुण मौजूद।' },
-            house2: { en: 'House 2 (Wealth): Financial stability through efforts. Family support strong.', hi: 'द्वितीय भाव (धन): प्रयासों के माध्यम से वित्तीय स्थिरता। पारिवारिक समर्थन मजबूत।' },
+            house1: { en: `House 1 (Self): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'en').substring(0, 200)}...`, hi: `प्रथम भाव (स्वयं): ${analyzeLagnaPersonality(RASHIS[ascSignIndex], enrichedPlanets, 'hi').substring(0, 200)}...` },
+            house2: { en: `House 2 (Wealth): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `द्वितीय भाव (धन): ${analyzeWealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
             house3: { en: 'House 3 (Siblings): Communication skills are strong. Courage and determination will help in ventures.', hi: 'तृतीय भाव (भाई-बहन): संचार कौशल मजबूत है। साहस और दृढ़ संकल्प उद्यमों में मदद करेगा।' },
             house4: { en: 'House 4 (Mother & Home): Domestic happiness and property matters are favorable. Strong emotional foundation.', hi: 'चतुर्थ भाव (माता और घर): घरेलू सुख और संपत्ति के मामले अनुकूल हैं। मजबूत भावनात्मक आधार।' },
-            house5: { en: 'House 5 (Children & Education): Education prospects good. Creative abilities present.', hi: 'पंचम भाव (संतान और शिक्षा): शिक्षा की संभावनाएं अच्छी। रचनात्मक क्षमताएं मौजूद।' },
-            house6: { en: 'House 6 (Health & Enemies): Health requires attention. Victory over obstacles expected.', hi: 'षष्ठ भाव (स्वास्थ्य और शत्रु): स्वास्थ्य पर ध्यान देने की आवश्यकता। बाधाओं पर विजय की उम्मीद।' },
-            house7: { en: 'House 7 (Marriage): Partnership and marriage prospects favorable. Harmony in relationships.', hi: 'सप्तम भाव (विवाह): साझेदारी और विवाह की संभावनाएं अनुकूल। रिश्तों में सद्भाव।' },
+            house5: { en: `House 5 (Children & Education): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `पंचम भाव (संतान और शिक्षा): ${analyzeEducation(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house6: { en: `House 6 (Health & Enemies): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `षष्ठ भाव (स्वास्थ्य और शत्रु): ${analyzeHealth(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
+            house7: { en: `House 7 (Marriage): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'en').substring(0, 200)}...`, hi: `सप्तम भाव (विवाह): ${analyzeRelationships(enrichedPlanets, RASHIS[ascSignIndex], calculateMangalDosha(enrichedPlanets, ascDegree), 'hi').substring(0, 200)}...` },
             house8: { en: 'House 8 (Longevity): Transformation and hidden knowledge bring growth. Research and occult sciences may interest you.', hi: 'अष्टम भाव (आयु): परिवर्तन और गुप्त ज्ञान विकास लाते हैं। अनुसंधान और गुप्त विज्ञान में रुचि हो सकती है।' },
             house9: { en: 'House 9 (Fortune): Higher education and spiritual pursuits are favored. Long journeys bring opportunities.', hi: 'नवम भाव (भाग्य): उच्च शिक्षा और आध्यात्मिक गतिविधियां अनुकूल हैं। लंबी यात्राएं अवसर लाती हैं।' },
-            house10: { en: 'House 10 (Career): Career growth through dedication. Professional success indicated.', hi: 'दशम भाव (करियर): समर्पण के माध्यम से करियर विकास। पेशेवर सफलता संकेत।' },
+            house10: { en: `House 10 (Career): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'en').substring(0, 200)}...`, hi: `दशम भाव (करियर): ${analyzeCareer(enrichedPlanets, RASHIS[ascSignIndex], 'hi').substring(0, 200)}...` },
             house11: { en: 'House 11 (Gains): Financial gains through friends and networks. Aspirations will be fulfilled with effort.', hi: 'एकादश भाव (लाभ): मित्रों और नेटवर्क के माध्यम से वित्तीय लाभ। प्रयास से आकांक्षाएं पूरी होंगी।' },
             house12: { en: 'House 12 (Spirituality): Expenses on spiritual and charitable activities. Foreign connections possible.', hi: 'द्वादश भाव (आध्यात्मिकता): आध्यात्मिक और धर्मार्थ गतिविधियों पर व्यय। विदेशी संबंध संभव।' },
           },
           // NEW: वर्ष फल - Yearly Prediction
           yearlyPrediction: {
-            en: `Current Year Analysis: Based on planetary transits, this year brings opportunities for growth. ${vimshottariDasha?.currentDasha?.planet || 'Planetary'} Mahadasha influences your path. Focus on ${RASHIS[ascSignIndex]} qualities for success.`,
-            hi: `वर्तमान वर्ष विश्लेषण: ग्रहों के गोचर के आधार पर, यह वर्ष विकास के अवसर लाता है। ${vimshottariDasha?.currentDasha?.planet || 'ग्रह'} महादशा आपके मार्ग को प्रभावित करती है। सफलता के लिए ${RASHIS[ascSignIndex]} गुणों पर ध्यान दें।`
+            en: `Current Year Analysis: Based on planetary transits, this year brings opportunities for growth. ${vimshottariDasha.currentDasha.planet} Mahadasha influences your path. Focus on ${RASHIS[ascSignIndex]} qualities for success.`,
+            hi: `वर्तमान वर्ष विश्लेषण: ग्रहों के गोचर के आधार पर, यह वर्ष विकास के अवसर लाता है। ${vimshottariDasha.currentDasha.planet} महादशा आपके मार्ग को प्रभावित करती है। सफलता के लिए ${RASHIS[ascSignIndex]} गुणों पर ध्यान दें।`
           },
           // NEW: महादशा फल - Mahadasha Prediction
           mahadashaPhal: {
-            en: vimshottariDasha?.currentDasha ? `Current Mahadasha: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} to ${vimshottariDasha.currentDasha.endDate.split('T')[0]}). This period emphasizes ${vimshottariDasha.currentDasha.planet}'s qualities in your life. ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'en')}` : 'Mahadasha analysis: Planetary periods influence life events. Consult detailed dasha chart for timing.',
-            hi: vimshottariDasha?.currentDasha ? `वर्तमान महादशा: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} से ${vimshottariDasha.currentDasha.endDate.split('T')[0]} तक)। यह अवधि आपके जीवन में ${vimshottariDasha.currentDasha.planet} के गुणों पर जोर देती है। ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'hi')}` : 'महादशा विश्लेषण: ग्रह अवधि जीवन की घटनाओं को प्रभावित करती है। समय के लिए विस्तृत दशा चार्ट देखें।'
+            en: `Current Mahadasha: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} to ${vimshottariDasha.currentDasha.endDate.split('T')[0]}). This period emphasizes ${vimshottariDasha.currentDasha.planet}'s qualities in your life. ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'en')}`,
+            hi: `वर्तमान महादशा: ${vimshottariDasha.currentDasha.planet} (${vimshottariDasha.currentDasha.startDate.split('T')[0]} से ${vimshottariDasha.currentDasha.endDate.split('T')[0]} तक)। यह अवधि आपके जीवन में ${vimshottariDasha.currentDasha.planet} के गुणों पर जोर देती है। ${analyzeDashaPredictions(vimshottariDasha, enrichedPlanets, 'hi')}`
           },
           // NEW: शुभ सुझाव - Auspicious Suggestions
           auspiciousSuggestions: {
@@ -1593,12 +1588,10 @@ function computeKundali(payload) {
           }
         };
       } catch (error) {
-        console.error('[astro-engine] ❌ ERROR generating Phallit:', error);
-        console.error('[astro-engine] Error stack:', error.stack);
-        console.error('[astro-engine] Error message:', error.message);
-        // Return fallback predictions with error info
+        console.error('[astro-engine] Error generating Phallit:', error);
+        // Return fallback predictions
         return {
-          lagnaPersonality: { en: `Analysis error: ${error.message}`, hi: `विश्लेषण त्रुटि: ${error.message}` },
+          lagnaPersonality: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
           moonEmotions: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
           education: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
           career: { en: 'Analysis not available', hi: 'विश्लेषण उपलब्ध नहीं' },
@@ -1651,13 +1644,21 @@ function getNamaksharFromNakshatra(nakshatraName, pada) {
   return letters ? letters[pada - 1] : "Unknown";
 }
 
+// Helper function to get Rasi Lord
+function getRasiLord(sign) {
+  const lords = {
+    "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
+    "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
+    "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
+    "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+  };
+  return lords[sign] || "Unknown";
+}
+
 // Generate simple chart SVG
 function generateSimpleChart(ascendant) {
   return `<svg width="200" height="200" viewBox="0 0 200 200"><rect fill="#1a1a2e" width="200" height="200"/><path stroke="#4a90e2" stroke-width="2" fill="none" d="M100,10 L190,100 L100,190 L10,100 Z"/><line stroke="#4a90e2" stroke-width="1" x1="100" y1="10" x2="100" y2="190"/><line stroke="#4a90e2" stroke-width="1" x1="10" y1="100" x2="190" y2="100"/><text fill="#fff" x="100" y="25" text-anchor="middle" font-size="10">Asc: ${ascendant}</text></svg>`;
 }
-
-
-// SERVER INITIALIZATION
 
 const server = http.createServer(async (req, res) => {
   // CORS headers
@@ -1695,26 +1696,12 @@ const server = http.createServer(async (req, res) => {
       console.log("[Kundali Matching] Received request for:", person1.name, "and", person2.name);
 
       // Generate Kundalis for both
-      // Robust date parsing
-      const parseDateParts = (dateStr) => {
-        const d = new Date(dateStr);
-        // Fallback for manual parsing to avoid timezone day shifts
-        if (typeof dateStr === 'string' && dateStr.includes('-')) {
-          const parts = dateStr.split('T')[0].split('-');
-          return { year: parseInt(parts[0]), month: parseInt(parts[1]), day: parseInt(parts[2]) };
-        }
-        return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
-      };
-
-      const date1 = parseDateParts(person1.dateOfBirth);
-      const date2 = parseDateParts(person2.dateOfBirth);
-
       const kundali1 = computeKundali({
         name: person1.name,
         gender: person1.gender || "male",
-        year: date1.year,
-        month: date1.month,
-        day: date1.day,
+        year: new Date(person1.dateOfBirth).getFullYear(),
+        month: new Date(person1.dateOfBirth).getMonth() + 1,
+        day: new Date(person1.dateOfBirth).getDate(),
         hour: parseInt(person1.timeOfBirth.split(":")[0]) || 12,
         minute: parseInt(person1.timeOfBirth.split(":")[1]) || 0,
         second: parseInt(person1.timeOfBirth.split(":")[2]) || 0,
@@ -1726,9 +1713,9 @@ const server = http.createServer(async (req, res) => {
       const kundali2 = computeKundali({
         name: person2.name,
         gender: person2.gender || "female",
-        year: date2.year,
-        month: date2.month,
-        day: date2.day,
+        year: new Date(person2.dateOfBirth).getFullYear(),
+        month: new Date(person2.dateOfBirth).getMonth() + 1,
+        day: new Date(person2.dateOfBirth).getDate(),
         hour: parseInt(person2.timeOfBirth.split(":")[0]) || 12,
         minute: parseInt(person2.timeOfBirth.split(":")[1]) || 0,
         second: parseInt(person2.timeOfBirth.split(":")[2]) || 0,
@@ -1741,89 +1728,252 @@ const server = http.createServer(async (req, res) => {
       const moon1 = kundali1.planets.find(p => p.name === "Moon");
       const moon2 = kundali2.planets.find(p => p.name === "Moon");
 
-      if (!moon1 || !moon2) {
-        return respondJson(res, 400, { error: "Moon data missing for one or both individuals. Check birth details." });
-      }
-
       // Helper functions for Guna calculations
-      // Use global functions for accurate Guna calculations
-      // (getVarnaFromSign, getVashya, getTara, getYoniFromNakshatra, getGanaFromNakshatra, getNadiFromNakshatra, getRasiLord)
+      const getVarna = (moonSign) => {
+        const varnas = {
+          "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
+          "Aries": "Kshatriya", "Leo": "Kshatriya", "Sagittarius": "Kshatriya",
+          "Taurus": "Vaisya", "Virgo": "Vaisya", "Capricorn": "Vaisya",
+          "Gemini": "Shudra", "Libra": "Shudra", "Aquarius": "Shudra"
+        };
+        return varnas[moonSign] || "Unknown";
+      };
+
+      const getVashya = (moonSign) => {
+        const vashyas = {
+          "Aries": "Quadruped", "Taurus": "Quadruped", "Leo": "Quadruped",
+          "Sagittarius": "Manav", "Gemini": "Manav", "Virgo": "Manav",
+          "Libra": "Manav", "Aquarius": "Manav",
+          "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
+          "Scorpio": "Keeta"
+        };
+        return vashyas[moonSign] || "Unknown";
+      };
+
+      const getTara = (nakIndex1, nakIndex2) => {
+        const diff = ((nakIndex2 - nakIndex1 + 27) % 27);
+        const taraGroup = diff % 9;
+        const taras = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Param Mitra"];
+        return taras[taraGroup];
+      };
+
+      const getYoni = (nakIndex) => {
+        // AstroSage compatible Yoni mapping for all 27 Nakshatras
+        const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
+          "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
+        const yoniMap = [
+          0,  // 1. Ashwini - Horse
+          1,  // 2. Bharani - Elephant
+          2,  // 3. Krittika - Sheep
+          3,  // 4. Rohini - Serpent
+          3,  // 5. Mrigashira - Serpent
+          4,  // 6. Ardra - Dog
+          5,  // 7. Punarvasu - Cat
+          2,  // 8. Pushya - Sheep
+          5,  // 9. Ashlesha - Cat
+          6,  // 10. Magha - Rat
+          6,  // 11. Purva Phalguni - Rat
+          7,  // 12. Uttara Phalguni - Cow
+          8,  // 13. Hasta - Buffalo
+          9,  // 14. Chitra - Tiger
+          8,  // 15. Swati - Buffalo
+          9,  // 16. Vishakha - Tiger
+          10, // 17. Anuradha - Hare
+          10, // 18. Jyeshtha - Hare
+          4,  // 19. Mula - Dog
+          11, // 20. Purva Ashadha - Monkey
+          12, // 21. Uttara Ashadha - Mongoose
+          11, // 22. Shravana - Monkey
+          12, // 23. Dhanishta - Lion
+          0,  // 24. Shatabhisha - Horse
+          12, // 25. Purva Bhadrapada - Lion
+          7,  // 26. Uttara Bhadrapada - Cow
+          1   // 27. Revati - Elephant
+        ];
+        return yonis[yoniMap[nakIndex - 1]];
+      };
+
+      const getGana = (nakIndex) => {
+        const ganaMap = [0, 0, 1, 1, 0, 2, 0, 2, 2, 2, 0, 0, 1, 1, 2, 0, 0, 2, 2, 0, 0, 1, 1, 2, 0, 0, 0];
+        const ganas = ["Deva", "Manushya", "Rakshasa"];
+        return ganas[ganaMap[nakIndex - 1]];
+      };
+
+      const getNadi = (nakIndex) => {
+        const nadis = ["Adi", "Madhya", "Antya"];
+        return nadis[(nakIndex - 1) % 3];
+      };
+
+      const getRasiLord = (moonSign) => {
+        const lords = {
+          "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
+          "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
+          "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
+          "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+        };
+        return lords[moonSign] || "Unknown";
+      };
 
       // Calculate each Guna with AstroSage-compatible scoring
-      const varna1 = getVarnaFromSign(moon1.sign);
-      const varna2 = getVarnaFromSign(moon2.sign);
-      const varnaOrder = { "Brahmin": 4, "Kshatriya": 3, "Vaisya": 2, "Sudra": 1 };
+      const varna1 = getVarna(moon1.sign);
+      const varna2 = getVarna(moon2.sign);
+      const varnaOrder = { "Brahmin": 4, "Kshatriya": 3, "Vaisya": 2, "Shudra": 1 };
       const varnaScore = (varnaOrder[varna1] >= varnaOrder[varna2]) ? 1 : 0;
 
       const vashya1 = getVashya(moon1.sign);
       const vashya2 = getVashya(moon2.sign);
       let vashyaScore = 0;
+      // AstroSage compatible Vashya scoring
       if (vashya1 === vashya2) {
         vashyaScore = 2;
       } else if ((vashya1 === "Manav" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Manav")) {
         vashyaScore = 0.5;
-      } else if ((vashya1 === "Chatu" && vashya2 === "Manav") || (vashya1 === "Manav" && vashya2 === "Chatu")) {
+      } else if ((vashya1 === "Quadruped" && vashya2 === "Manav") || (vashya1 === "Manav" && vashya2 === "Quadruped")) {
         vashyaScore = 1;
-      } else if ((vashya1 === "Chatu" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Chatu")) {
+      } else if ((vashya1 === "Quadruped" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Quadruped")) {
         vashyaScore = 0.5;
       } else {
         vashyaScore = 0;
       }
 
-      const t1Idx = ((moon2.nakshatra.index - moon1.nakshatra.index + 27) % 9) || 9;
-      const t2Idx = ((moon1.nakshatra.index - moon2.nakshatra.index + 27) % 9) || 9;
-      const tara1 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t1Idx];
-      const tara2 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t2Idx];
+      const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
+      const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
+      console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
+      const goodTaras = ["Sampat", "Kshema", "Sadhak", "Mitra", "Ati-Mitra"];
 
-      const goodTaraIndices = [2, 4, 6, 8, 9];
-      let taraScore = 0;
-      if (goodTaraIndices.includes(t1Idx)) taraScore += 1.5;
-      if (goodTaraIndices.includes(t2Idx)) taraScore += 1.5;
-      if (moon1.nakshatra.index === moon2.nakshatra.index) {
-        if (moon1.nakshatra.pada !== moon2.nakshatra.pada) taraScore = 3;
-        else taraScore = 1.5; // Same nak same pada often gets partial or full? AstroSage gives 3 usually if same nak.
+      const tara1Score = goodTaras.includes(tara1) ? 1.5 : 0;
+      const tara2Score = goodTaras.includes(tara2) ? 1.5 : 0;
+      let taraScore = tara1Score + tara2Score;
+
+      // Special case for Janma Tara if Nakshatras belong to same sign but different padas
+      if (tara1 === "Janma" && tara2 === "Janma") {
+        if (moon1.sign === moon2.sign && moon1.nakshatra.name !== moon2.nakshatra.name) {
+          taraScore = 3;
+        }
       }
+
+      console.log('[Matching] Tara Score:', taraScore);
 
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
-      const yoniScore = (YONI_MATRIX[yoni1] && YONI_MATRIX[yoni1][yoni1] !== undefined && YONI_MATRIX[yoni1][yoni2] !== undefined) ? YONI_MATRIX[yoni1][yoni2] : 2;
+      console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
+
+      // Comprehensive Yoni compatibility table to match AstroSage
+      const yoniCompatibility = {
+        // Same Yoni
+        "Horse-Horse": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Serpent-Serpent": 4,
+        "Dog-Dog": 4, "Cat-Cat": 4, "Rat-Rat": 4, "Cow-Cow": 4, "Buffalo-Buffalo": 4,
+        "Tiger-Tiger": 4, "Deer-Deer": 4, "Monkey-Monkey": 4, "Lion-Lion": 4, "Mongoose-Mongoose": 4,
+        // Specific Pairs
+        "Cow-Buffalo": 3, "Buffalo-Cow": 3,
+        "Elephant-Sheep": 3, "Sheep-Elephant": 3,
+        "Horse-Elephant": 2, "Elephant-Horse": 2,
+        "Serpent-Rat": 2, "Rat-Serpent": 2,
+        "Dog-Cat": 2, "Cat-Dog": 2,
+        "Horse-Dog": 2, "Dog-Horse": 2,
+        "Tiger-Lion": 2, "Lion-Tiger": 2,
+        "Buffalo-Sheep": 2, "Sheep-Buffalo": 2,
+        "Snake-Dog": 2, "Dog-Snake": 2,
+        // Enemy Pairs
+        "Horse-Buffalo": 0, "Buffalo-Horse": 0,
+        "Elephant-Lion": 0, "Lion-Elephant": 0,
+        "Sheep-Monkey": 0, "Monkey-Sheep": 0,
+        "Serpent-Mongoose": 0, "Mongoose-Serpent": 0,
+        "Dog-Deer": 0, "Deer-Dog": 0,
+        "Cat-Rat": 0, "Rat-Cat": 0,
+        "Cow-Tiger": 0, "Tiger-Cow": 0,
+        "Monkey-Tiger": 0, "Tiger-Monkey": 0,
+        "Deer-Horse": 0, "Horse-Deer": 0,
+        "Mongoose-Rat": 0, "Rat-Mongoose": 0
+      };
+
+      const yoniKey = `${yoni1}-${yoni2}`;
+      let yoniScore = yoniCompatibility[yoniKey];
+      if (yoniScore === undefined) {
+        if (yoni1 === "Unknown" || yoni2 === "Unknown") yoniScore = 0;
+        else yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default
+      }
+      console.log('[Matching] Yoni Score:', yoniScore, 'for', yoniKey);
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
-      const grahaMaitriScore = (MAITRI_SCORES[lord1] && MAITRI_SCORES[lord1][lord2] !== undefined) ? MAITRI_SCORES[lord1][lord2] : 0.5;
+      let grahaMaitriScore = 0;
+
+      // Direct lookup table for all planetary pairs (AstroSage standard)
+      const maitriScores = {
+        "Sun-Sun": 5, "Sun-Moon": 5, "Sun-Mars": 5, "Sun-Jupiter": 5, "Sun-Mercury": 4, "Sun-Venus": 0, "Sun-Saturn": 0,
+        "Moon-Sun": 5, "Moon-Moon": 5, "Moon-Mercury": 5, "Moon-Mars": 4, "Moon-Jupiter": 4, "Moon-Venus": 4, "Moon-Saturn": 4,
+        "Mars-Sun": 5, "Mars-Moon": 5, "Mars-Mars": 5, "Mars-Jupiter": 5, "Mars-Venus": 3, "Mars-Saturn": 3, "Mars-Mercury": 0,
+        "Mercury-Sun": 5, "Mercury-Venus": 5, "Mercury-Mercury": 5, "Mercury-Moon": 0, "Mercury-Mars": 4, "Mercury-Jupiter": 0.5, "Mercury-Saturn": 4,
+        "Jupiter-Sun": 5, "Jupiter-Moon": 5, "Jupiter-Mars": 5, "Jupiter-Jupiter": 5, "Jupiter-Mercury": 0.5, "Jupiter-Venus": 0.5, "Jupiter-Saturn": 4,
+        "Venus-Mercury": 5, "Venus-Saturn": 5, "Venus-Venus": 5, "Venus-Mars": 3, "Venus-Jupiter": 3, "Venus-Sun": 0, "Venus-Moon": 0,
+        "Saturn-Mercury": 5, "Saturn-Venus": 5, "Saturn-Saturn": 5, "Saturn-Jupiter": 4, "Saturn-Sun": 0, "Saturn-Moon": 0, "Saturn-Mars": 0
+      };
+
+      const pairKey = `${lord1}-${lord2}`;
+      grahaMaitriScore = maitriScores[pairKey] !== undefined ? maitriScores[pairKey] : 0.5;
 
       const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
-      const ganaScore = (GANA_SCORING[gana1] && GANA_SCORING[gana1][gana2] !== undefined) ? GANA_SCORING[gana1][gana2] : 0;
+      let ganaScore = 0;
+      if (gana1 === gana2) ganaScore = 6;
+      else if (gana1 === "Deva" && gana2 === "Manushya") ganaScore = 6;
+      else if (gana1 === "Manushya" && gana2 === "Deva") ganaScore = 5;
+      else if (gana1 === "Deva" && gana2 === "Rakshasa") ganaScore = 1;
+      else if (gana1 === "Rakshasa" && gana2 === "Deva") ganaScore = 0;
+      else if (gana1 === "Manushya" && gana2 === "Rakshasa") ganaScore = 0;
+      else if (gana1 === "Rakshasa" && gana2 === "Manushya") ganaScore = 0;
 
-      const sign1Index = RASHIS.indexOf(moon1.sign);
-      const sign2Index = RASHIS.indexOf(moon2.sign);
+      // Bhakoot - sign compatibility (AstroSage method)
+      const getSignIndex = (sign) => RASHIS.indexOf(sign);
+      const sign1Index = getSignIndex(moon1.sign);
+      const sign2Index = getSignIndex(moon2.sign);
       const signDistance = ((sign2Index - sign1Index + 12) % 12) + 1;
-      let bhakootScore = [2, 5, 6, 8, 9, 12].includes(signDistance) ? 0 : 7;
-      // Exception: If Rasi Lords are same or mutual friends, Bhakoot is 7
-      if (bhakootScore === 0 && (lord1 === lord2 || (isFriend(lord1, lord2) && isFriend(lord2, lord1)))) {
-        bhakootScore = 7;
+      const inauspiciousDistances = [2, 5, 6, 8, 9, 12];
+
+      let bhakootScore = inauspiciousDistances.includes(signDistance) ? 0 : 7;
+
+      // Bhakoot Cancellation (Dosha Parihar)
+      if (bhakootScore === 0) {
+        const lord1 = getRasiLord(moon1.sign);
+        const lord2 = getRasiLord(moon2.sign);
+        if (lord1 === lord2) {
+          bhakootScore = 7; // Cancelled if sign lords are same
+        }
       }
 
       const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
       const nadi2 = getNadiFromNakshatra(moon2.nakshatra.index);
+      console.log('[Matching] Nadi1:', nadi1, 'Nadi2:', nadi2);
       const nadiScore = nadi1 !== nadi2 ? 8 : 0;
 
       const totalScore = varnaScore + vashyaScore + taraScore + yoniScore + grahaMaitriScore + ganaScore + bhakootScore + nadiScore;
+      const maxScore = 36;
+      const percentage = Math.round((totalScore / maxScore) * 100);
 
-      const mangalDosha1 = calculateMangalDosha(kundali1.planets, kundali1.ascendant.degree);
-      const mangalDosha2 = calculateMangalDosha(kundali2.planets, kundali2.ascendant.degree);
+      console.log('[Matching] Total Score:', totalScore, '/', maxScore);
+
+      // Mangal Dosha calculation
+      const calculateMangalDosha = (kundali) => {
+        const mars = kundali.planets.find(p => p.name === "Mars");
+        if (!mars) return "No Mangal Dosha";
+        const house = mars.house;
+        if ([1, 4, 7, 8, 12].includes(house)) return "High Mangal Dosha";
+        if ([2].includes(house)) return "Low Mangal Dosha";
+        return "No Mangal Dosha";
+      };
+
+      const mangalDosha1 = calculateMangalDosha(kundali1);
+      const mangalDosha2 = calculateMangalDosha(kundali2);
+
+      console.log("[Kundali Matching] Total Score:", totalScore, "/36");
 
       const matchingResult = {
         totalScore: Math.round(totalScore * 10) / 10,
         maxScore: 36,
         percentage: Math.round((totalScore / 36) * 100),
         compatibility: totalScore >= 28 ? "Excellent" : totalScore >= 24 ? "Very Good" : totalScore >= 18 ? "Good" : "Average",
-        totalDisplayScore: (Math.round(totalScore * 10) / 10).toFixed(1),
-        debug: {
-          boy: { varna: varna1, vashya: vashya1, tara: tara1, yoni: yoni1, gana: gana1, bhakootSign: moon1.sign, nadi: nadi1 },
-          girl: { varna: varna2, vashya: vashya2, tara: tara2, yoni: yoni2, gana: gana2, bhakootSign: moon2.sign, nadi: nadi2 }
-        },
+        totalDisplayScore: (Math.round(totalScore * 10) / 10).toFixed(1), // Added for clarity
         details: [
           { name: "Varna (वर्ण)", boyValue: varna1, girlValue: varna2, score: varnaScore, maxScore: 1, areaOfLife: "Work", description: "Spiritual compatibility and ego levels" },
           { name: "Vashya (वश्य)", boyValue: vashya1, girlValue: vashya2, score: vashyaScore, maxScore: 2, areaOfLife: "Dominance", description: "Mutual attraction and control" },
@@ -2071,16 +2221,6 @@ async function startWhatsAppConnection() {
 // Start WhatsApp connection on server start
 startWhatsAppConnection();
 
-// Global Error Handlers to prevent 502 crashes
-process.on('uncaughtException', (err) => {
-  console.error('[astro-engine] Uncaught Exception:', err);
-  // Keep the process alive if possible, or exit gracefully
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('[astro-engine] Unhandled Rejection at:', promise, 'reason:', reason);
-});
-
 server.listen(PORT, () => {
   console.log(`[astro-engine] Listening on http://localhost:${PORT}/kundali`);
   console.log(`[astro-engine] WhatsApp endpoints available:`);
@@ -2089,20 +2229,3 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
