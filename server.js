@@ -1097,7 +1097,7 @@ function computeKundali(payload) {
       name: "Ketu",
       longitude: ketuLongitude,
       latitude: rahu.latitude * -1,
-      degreeInSign: ketuLongitude % 30,
+      degree: ketuLongitude % 30,
       sign: RASHIS[ketuSignIndex],
       signIndex: ketuSignIndex,
       nakshatra: ketuNakshatra,
@@ -1982,5 +1982,6 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
