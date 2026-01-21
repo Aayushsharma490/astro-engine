@@ -554,11 +554,14 @@ function calculateMangalDosha(planets, ascDegree) {
 }
 
 function getYoniFromNakshatra(nakIndex) {
-  const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
-    "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
+  const yonis = ["Horse", "Elephant", "Sheep", "Snake", "Dog", "Cat", "Rat", "Cow",
+    "Buffalo", "Tiger", "Deer", "Monkey", "Lion", "Mongoose"];
+  // Correct yoni mapping for all 27 nakshatras
   const yoniMap = [
-    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 11, 12, 11, 12, 13, 13,
-    4, 10, 10, 10, 9, 0, 9, 9, 1
+    0, 1, 2, 3, 4, 5, 6, 7,      // 1-8: Ashwini to Pushya
+    8, 9, 10, 7, 11, 12, 11, 12, // 9-16: Ashlesha to Vishakha  
+    13, 13, 4, 10, 10, 10,       // 17-22: Anuradha to Shravana
+    9, 0, 9, 9, 1                // 23-27: Dhanishta to Revati
   ];
   return yonis[yoniMap[nakIndex - 1]];
 }
@@ -575,10 +578,14 @@ function getNadiFromNakshatra(nakIndex) {
 }
 
 function getTara(nak1, nak2) {
-  // Calculate Tara based on nakshatra distance
-  const distance = ((nak2 - nak1 + 27) % 27) + 1;
-  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Param Mitra"];
-  const taraIndex = (distance - 1) % 9;
+  // Correct Tara calculation: count from nak1 to nak2
+  let count = nak2 - nak1;
+  if (count <= 0) count += 27;
+
+  // Tara repeats every 9 nakshatras
+  const taraIndex = (count - 1) % 9;
+  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhaka", "Vadha", "Mitra", "Ati Mitra"];
+
   return taraNames[taraIndex];
 }
 
@@ -1625,7 +1632,7 @@ const server = http.createServer(async (req, res) => {
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
       console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
-      const goodTaras = ["Sadhak", "Mitra", "Param Mitra", "Sampat", "Kshema"];
+      const goodTaras = ["Sadhaka", "Mitra", "Ati Mitra", "Sampat", "Kshema"];
       // If both have good Taras, give full 3 points
       const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 :
         (goodTaras.includes(tara1) || goodTaras.includes(tara2)) ? 1.5 : 0;
@@ -1991,3 +1998,4 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
