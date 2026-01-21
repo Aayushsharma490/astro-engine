@@ -1611,13 +1611,16 @@ const server = http.createServer(async (req, res) => {
 
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
+      console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
       const goodTaras = ["Sadhak", "Mitra", "Param Mitra", "Sampat", "Kshema"];
       // If both have good Taras, give full 3 points
       const taraScore = (goodTaras.includes(tara1) && goodTaras.includes(tara2)) ? 3 :
         (goodTaras.includes(tara1) || goodTaras.includes(tara2)) ? 1.5 : 0;
+      console.log('[Matching] Tara Score:', taraScore);
 
       const yoni1 = getYoni(moon1.nakshatra.index);
       const yoni2 = getYoni(moon2.nakshatra.index);
+      console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
       let yoniScore = 0;
       if (yoni1 === yoni2) yoniScore = 4;
       else if ((yoni1 === "Horse" && yoni2 === "Horse") || (yoni1 === "Elephant" && yoni2 === "Elephant")) yoniScore = 4;
@@ -1749,50 +1752,12 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  /* REMOVED DUPLICATE ENDPOINT - Using the one at line 1458 instead
   // Kundali Matching Endpoint
   if (req.method === "POST" && req.url === "/api/kundali-matching") {
-    try {
-      const body = await readJsonBody(req);
-      console.log("[astro-engine] Kundali matching request received");
-
-      const { person1, person2 } = body;
-
-      // Generate kundali for both persons
-      const kundali1 = computeKundali({
-        year: parseInt(person1.dateOfBirth.split('-')[0]),
-        month: parseInt(person1.dateOfBirth.split('-')[1]),
-        day: parseInt(person1.dateOfBirth.split('-')[2]),
-        hour: parseInt(person1.timeOfBirth.split(':')[0]),
-        minute: parseInt(person1.timeOfBirth.split(':')[1]),
-        latitude: person1.placeOfBirth.latitude,
-        longitude: person1.placeOfBirth.longitude,
-        timezone: 5.5
-      });
-
-      const kundali2 = computeKundali({
-        year: parseInt(person2.dateOfBirth.split('-')[0]),
-        month: parseInt(person2.dateOfBirth.split('-')[1]),
-        day: parseInt(person2.dateOfBirth.split('-')[2]),
-        hour: parseInt(person2.timeOfBirth.split(':')[0]),
-        minute: parseInt(person2.timeOfBirth.split(':')[1]),
-        latitude: person2.placeOfBirth.latitude,
-        longitude: person2.placeOfBirth.longitude,
-        timezone: 5.5
-      });
-
-      // Perform Ashtakoot matching
-      const matchingResult = computeAshtakootMatching(kundali1, kundali2);
-
-      respondJson(res, 200, matchingResult);
-    } catch (error) {
-      console.error("[astro-engine] Kundali matching error:", error);
-      respondJson(res, 500, {
-        error: "Failed to perform kundali matching",
-        details: error.message
-      });
-    }
-    return;
+    ... duplicate code removed ...
   }
+  */
 
   // WhatsApp Status Endpoint
   if (req.method === "GET" && req.url === "/whatsapp/status") {
