@@ -14,7 +14,7 @@ const path = require("path");
 const fs = require("fs");
 const sweph = require("sweph");
 
-const PORT = Number(process.env.ASTRO_ENGINE_PORT || 5005);
+const PORT = Number(process.env.PORT || process.env.ASTRO_ENGINE_PORT || 5005);
 const EPHE_PATH =
   process.env.SWE_EPHE_PATH ||
   path.resolve(__dirname, "swisseph-master", "ephe");
@@ -159,6 +159,39 @@ const NAKSHATRA_LORDS = [
 ];
 
 const BENEFIC_PLANETS = new Set(["Jupiter", "Venus", "Mercury", "Moon"]);
+
+const YONI_MATRIX = {
+  "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
+  "Gaja": { "Ashwa": 2, "Gaja": 4, "Mesha": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
+  "Mesha": { "Ashwa": 2, "Gaja": 3, "Mesha": 4, "Sarpa": 2, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 0, "Simha": 1, "Nakul": 2 },
+  "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 0 },
+  "Shwan": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+  "Marjar": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+  "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
+  "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+  "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+  "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
+  "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 2, "Nakul": 2 },
+  "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
+  "Simha": { "Ashwa": 1, "Gaja": 0, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 2, "Vanar": 3, "Simha": 4, "Nakul": 2 },
+  "Nakul": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
+};
+
+const GANA_SCORING = {
+  "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 1 },
+  "Manushya": { "Devta": 5, "Manushya": 6, "Rakshasa": 0 },
+  "Rakshasa": { "Devta": 0, "Manushya": 0, "Rakshasa": 6 }
+};
+
+const MAITRI_SCORES = {
+  "Sun": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 4, "Jupiter": 5, "Venus": 0, "Saturn": 0 },
+  "Moon": { "Sun": 5, "Moon": 5, "Mars": 4, "Mercury": 5, "Jupiter": 4, "Venus": 4, "Saturn": 4 },
+  "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3.5, "Saturn": 3.5 },
+  "Mercury": { "Sun": 5, "Moon": 0, "Mars": 4, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 4 },
+  "Jupiter": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0.5, "Jupiter": 5, "Venus": 0.5, "Saturn": 4 },
+  "Venus": { "Sun": 0, "Moon": 0, "Mars": 3.5, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 5 },
+  "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
+};
 
 const PLANET_CONFIG = [
   { id: constants.SE_SUN, name: "Sun" },
@@ -468,9 +501,11 @@ function getNadiFromNakshatra(nakIndex) {
 }
 
 function getTara(nak1, nak2) {
-  const diff = (nak2 - nak1 + 27) % 9 || 9;
-  const taras = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
-  return taras[diff];
+  if (!nak1 || !nak2) return "Unknown";
+  const count = ((nak2 - nak1 + 27) % 27) + 1;
+  const taraIndex = (count - 1) % 9;
+  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
+  return taraNames[taraIndex];
 }
 
 // ===== PANCHANG CALCULATION FUNCTIONS =====
@@ -563,22 +598,26 @@ function calculateMasa(moonLong, sunLong) {
 
 function calculateMangalDosha(planets, ascDegree) {
   const mars = planets.find(p => p.name === "Mars");
-  if (!mars) return "No";
+  if (!mars) return "No Mangal Dosha";
 
   const house = houseFromAscendant(mars.longitude, ascDegree);
-  // Mangal Dosha exists if Mars is in houses 1, 2, 4, 7, 8, or 12
-  if ([1, 2, 4, 7, 8, 12].includes(house)) {
-    return "Yes";
+  // Mangal Dosha exists if Mars is in houses 1, 4, 7, 8, or 12 (High) or 2 (Low)
+  if ([1, 4, 7, 8, 12].includes(house)) {
+    return "High Mangal Dosha";
   }
-  return "No";
+  if (house === 2) {
+    return "Low Mangal Dosha";
+  }
+  return "No Mangal Dosha";
 }
 
 function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
+  // AstroSage style Yoni names
   const yonis = [
-    "Horse", "Elephant", "Sheep", "Serpent", "Serpent", "Dog", "Cat", "Sheep", "Cat",
-    "Rat", "Rat", "Cow", "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer",
-    "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse", "Lion", "Cow", "Elephant"
+    "Ashwa", "Gaja", "Mesha", "Sarpa", "Sarpa", "Shwan", "Marjar", "Mesha", "Marjar",
+    "Mushak", "Mushak", "Gau", "Mahish", "Vyaghra", "Mahish", "Vyaghra", "Mriga", "Mriga",
+    "Shwan", "Vanar", "Nakul", "Vanar", "Simha", "Ashwa", "Simha", "Gau", "Gaja"
   ];
   return yonis[nakIndex - 1] || "Unknown";
 }
@@ -593,27 +632,17 @@ function getGanaFromNakshatra(nakIndex) {
   return ganas[nakIndex - 1] || "Unknown";
 }
 
-function getNadiFromNakshatra(nakIndex) {
-  if (!nakIndex) return "Unknown";
-  // Nadi groups: 1, 6, 7, 12, 13, 18, 19, 24, 25 -> Adi
-  //            2, 5, 8, 11, 14, 17, 20, 23, 26 -> Madhya
-  //            3, 4, 9, 10, 15, 16, 21, 22, 27 -> Antya
-  const adi = [1, 6, 7, 12, 13, 18, 19, 24, 25];
-  const madhya = [2, 5, 8, 11, 14, 17, 20, 23, 26];
-  const antya = [3, 4, 9, 10, 15, 16, 21, 22, 27];
-
-  if (adi.includes(nakIndex)) return "Adi";
-  if (madhya.includes(nakIndex)) return "Madhya";
-  if (antya.includes(nakIndex)) return "Antya";
-  return "Unknown";
-}
-
-function getTara(nak1, nak2) {
-  if (!nak1 || !nak2) return "Unknown";
-  const count = ((nak2 - nak1 + 27) % 27) + 1;
-  const taraIndex = (count - 1) % 9;
-  const taraNames = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
-  return taraNames[taraIndex];
+function isFriend(p1, p2) {
+  const friends = {
+    "Sun": ["Moon", "Mars", "Jupiter"],
+    "Moon": ["Sun", "Mercury"],
+    "Mars": ["Sun", "Moon", "Jupiter"],
+    "Mercury": ["Sun", "Venus"],
+    "Jupiter": ["Sun", "Moon", "Mars"],
+    "Venus": ["Mercury", "Saturn"],
+    "Saturn": ["Mercury", "Venus"]
+  };
+  return p1 === p2 || (friends[p1] && friends[p1].includes(p2));
 }
 
 function getVarnaFromSign(sign) {
@@ -1746,59 +1775,35 @@ const server = http.createServer(async (req, res) => {
       const tara1 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t1Idx];
       const tara2 = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"][t2Idx];
 
-      const goodTaraIndices = [1, 2, 4, 6, 8, 9];
+      const goodTaraIndices = [2, 4, 6, 8, 9];
       let taraScore = 0;
       if (goodTaraIndices.includes(t1Idx)) taraScore += 1.5;
       if (goodTaraIndices.includes(t2Idx)) taraScore += 1.5;
-      if (moon1.nakshatra.index === moon2.nakshatra.index && moon1.nakshatra.pada !== moon2.nakshatra.pada) taraScore = 3;
+      if (moon1.nakshatra.index === moon2.nakshatra.index) {
+        if (moon1.nakshatra.pada !== moon2.nakshatra.pada) taraScore = 3;
+        else taraScore = 1.5; // Same nak same pada often gets partial or full? AstroSage gives 3 usually if same nak.
+      }
 
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
-      const yoniMatrix = {
-        "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
-        "Gaja": { "Ashwa": 2, "Gaja": 4, "Mesha": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
-        "Mesha": { "Ashwa": 2, "Gaja": 3, "Mesha": 4, "Sarpa": 2, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 0, "Simha": 1, "Nakul": 2 },
-        "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 0 },
-        "Shwan": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Marjar": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
-        "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
-        "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 2, "Nakul": 2 },
-        "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
-        "Simha": { "Ashwa": 1, "Gaja": 0, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 2, "Vanar": 3, "Simha": 4, "Nakul": 2 },
-        "Nakul": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
-      };
-      let yoniScore = (yoniMatrix[yoni1] && yoniMatrix[yoni1][yoni2] !== undefined) ? yoniMatrix[yoni1][yoni2] : 2;
+      const yoniScore = (YONI_MATRIX[yoni1] && YONI_MATRIX[yoni1][yoni1] !== undefined && YONI_MATRIX[yoni1][yoni2] !== undefined) ? YONI_MATRIX[yoni1][yoni2] : 2;
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
-      const maitriScores = {
-        "Sun": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 4, "Jupiter": 5, "Venus": 0, "Saturn": 0 },
-        "Moon": { "Sun": 5, "Moon": 5, "Mars": 4, "Mercury": 5, "Jupiter": 4, "Venus": 4, "Saturn": 4 },
-        "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3, "Saturn": 3 },
-        "Mercury": { "Sun": 5, "Moon": 0, "Mars": 4, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 4 },
-        "Jupiter": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0.5, "Jupiter": 5, "Venus": 0.5, "Saturn": 4 },
-        "Venus": { "Sun": 0, "Moon": 0, "Mars": 3, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 5 },
-        "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
-      };
-      let grahaMaitriScore = (maitriScores[lord1] && maitriScores[lord1][lord2] !== undefined) ? maitriScores[lord1][lord2] : 0.5;
+      const grahaMaitriScore = (MAITRI_SCORES[lord1] && MAITRI_SCORES[lord1][lord2] !== undefined) ? MAITRI_SCORES[lord1][lord2] : 0.5;
 
       const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
-      const ganaScoring = {
-        "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 1 },
-        "Manushya": { "Devta": 5, "Manushya": 6, "Rakshasa": 0 },
-        "Rakshasa": { "Devta": 0, "Manushya": 0, "Rakshasa": 6 }
-      };
-      let ganaScore = (ganaScoring[gana1] && ganaScoring[gana1][gana2] !== undefined) ? ganaScoring[gana1][gana2] : 0;
+      const ganaScore = (GANA_SCORING[gana1] && GANA_SCORING[gana1][gana2] !== undefined) ? GANA_SCORING[gana1][gana2] : 0;
 
       const sign1Index = RASHIS.indexOf(moon1.sign);
       const sign2Index = RASHIS.indexOf(moon2.sign);
       const signDistance = ((sign2Index - sign1Index + 12) % 12) + 1;
       let bhakootScore = [2, 5, 6, 8, 9, 12].includes(signDistance) ? 0 : 7;
-      if (bhakootScore === 0 && lord1 === lord2) bhakootScore = 7;
+      // Exception: If Rasi Lords are same or mutual friends, Bhakoot is 7
+      if (bhakootScore === 0 && (lord1 === lord2 || (isFriend(lord1, lord2) && isFriend(lord2, lord1)))) {
+        bhakootScore = 7;
+      }
 
       const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
       const nadi2 = getNadiFromNakshatra(moon2.nakshatra.index);
@@ -1806,16 +1811,8 @@ const server = http.createServer(async (req, res) => {
 
       const totalScore = varnaScore + vashyaScore + taraScore + yoniScore + grahaMaitriScore + ganaScore + bhakootScore + nadiScore;
 
-      const calculateMangalDosha = (kundali) => {
-        const mars = kundali.planets.find(p => p.name === "Mars");
-        if (!mars) return "No Mangal Dosha";
-        const house = mars.house;
-        if ([1, 4, 7, 8, 12].includes(house)) return "High Mangal Dosha";
-        if ([2].includes(house)) return "Low Mangal Dosha";
-        return "No Mangal Dosha";
-      };
-      const mangalDosha1 = calculateMangalDosha(kundali1);
-      const mangalDosha2 = calculateMangalDosha(kundali2);
+      const mangalDosha1 = calculateMangalDosha(kundali1.planets, kundali1.ascendant.degree);
+      const mangalDosha2 = calculateMangalDosha(kundali2.planets, kundali2.ascendant.degree);
 
       const matchingResult = {
         totalScore: Math.round(totalScore * 10) / 10,
@@ -2082,6 +2079,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
