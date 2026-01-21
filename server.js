@@ -604,6 +604,26 @@ function getVarnaFromSign(sign) {
   return varnas[sign] || "Unknown";
 }
 
+function getVashya(moonSign) {
+  const vashyas = {
+    "Aries": "Quadruped", "Taurus": "Quadruped", "Leo": "Quadruped",
+    "Gemini": "Manav", "Virgo": "Manav", "Libra": "Manav", "Aquarius": "Manav", "Sagittarius": "Manav",
+    "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
+    "Scorpio": "Keeta"
+  };
+  return vashyas[moonSign] || "Unknown";
+}
+
+function getRasiLord(moonSign) {
+  const lords = {
+    "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
+    "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
+    "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
+    "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
+  };
+  return lords[moonSign] || "Unknown";
+}
+
 function getNakshatraPaya(nakIndex) {
   // Paya: Gold, Silver, Copper, Iron (cycles through nakshatras)
   const payas = ["Gold", "Silver", "Copper", "Iron"];
@@ -1730,95 +1750,17 @@ const server = http.createServer(async (req, res) => {
       const moon1 = kundali1.planets.find(p => p.name === "Moon");
       const moon2 = kundali2.planets.find(p => p.name === "Moon");
 
+      if (!moon1 || !moon2) {
+        return respondJson(res, 400, { error: "Moon data missing for one or both individuals. Check birth details." });
+      }
+
       // Helper functions for Guna calculations
-      const getVarna = (moonSign) => {
-        const varnas = {
-          "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
-          "Aries": "Kshatriya", "Leo": "Kshatriya", "Sagittarius": "Kshatriya",
-          "Taurus": "Vaisya", "Virgo": "Vaisya", "Capricorn": "Vaisya",
-          "Gemini": "Shudra", "Libra": "Shudra", "Aquarius": "Shudra"
-        };
-        return varnas[moonSign] || "Unknown";
-      };
-
-      const getVashya = (moonSign) => {
-        const vashyas = {
-          "Aries": "Quadruped", "Taurus": "Quadruped", "Leo": "Quadruped",
-          "Sagittarius": "Manav", "Gemini": "Manav", "Virgo": "Manav",
-          "Libra": "Manav", "Aquarius": "Manav",
-          "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
-          "Scorpio": "Keeta"
-        };
-        return vashyas[moonSign] || "Unknown";
-      };
-
-      const getTara = (nakIndex1, nakIndex2) => {
-        const diff = ((nakIndex2 - nakIndex1 + 27) % 27);
-        const taraGroup = diff % 9;
-        const taras = ["Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Param Mitra"];
-        return taras[taraGroup];
-      };
-
-      const getYoni = (nakIndex) => {
-        // AstroSage compatible Yoni mapping for all 27 Nakshatras
-        const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
-          "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
-        const yoniMap = [
-          0,  // 1. Ashwini - Horse
-          1,  // 2. Bharani - Elephant
-          2,  // 3. Krittika - Sheep
-          3,  // 4. Rohini - Serpent
-          3,  // 5. Mrigashira - Serpent
-          4,  // 6. Ardra - Dog
-          5,  // 7. Punarvasu - Cat
-          2,  // 8. Pushya - Sheep
-          5,  // 9. Ashlesha - Cat
-          6,  // 10. Magha - Rat
-          6,  // 11. Purva Phalguni - Rat
-          7,  // 12. Uttara Phalguni - Cow
-          8,  // 13. Hasta - Buffalo
-          9,  // 14. Chitra - Tiger
-          8,  // 15. Swati - Buffalo
-          9,  // 16. Vishakha - Tiger
-          10, // 17. Anuradha - Hare
-          10, // 18. Jyeshtha - Hare
-          4,  // 19. Mula - Dog
-          11, // 20. Purva Ashadha - Monkey
-          12, // 21. Uttara Ashadha - Mongoose
-          11, // 22. Shravana - Monkey
-          12, // 23. Dhanishta - Lion
-          0,  // 24. Shatabhisha - Horse
-          12, // 25. Purva Bhadrapada - Lion
-          7,  // 26. Uttara Bhadrapada - Cow
-          1   // 27. Revati - Elephant
-        ];
-        return yonis[yoniMap[nakIndex - 1]];
-      };
-
-      const getGana = (nakIndex) => {
-        const ganaMap = [0, 0, 1, 1, 0, 2, 0, 2, 2, 2, 0, 0, 1, 1, 2, 0, 0, 2, 2, 0, 0, 1, 1, 2, 0, 0, 0];
-        const ganas = ["Deva", "Manushya", "Rakshasa"];
-        return ganas[ganaMap[nakIndex - 1]];
-      };
-
-      const getNadi = (nakIndex) => {
-        const nadis = ["Adi", "Madhya", "Antya"];
-        return nadis[(nakIndex - 1) % 3];
-      };
-
-      const getRasiLord = (moonSign) => {
-        const lords = {
-          "Aries": "Mars", "Taurus": "Venus", "Gemini": "Mercury",
-          "Cancer": "Moon", "Leo": "Sun", "Virgo": "Mercury",
-          "Libra": "Venus", "Scorpio": "Mars", "Sagittarius": "Jupiter",
-          "Capricorn": "Saturn", "Aquarius": "Saturn", "Pisces": "Jupiter"
-        };
-        return lords[moonSign] || "Unknown";
-      };
+      // Use global functions for accurate Guna calculations
+      // (getVarnaFromSign, getVashya, getTara, getYoniFromNakshatra, getGanaFromNakshatra, getNadiFromNakshatra, getRasiLord)
 
       // Calculate each Guna with AstroSage-compatible scoring
-      const varna1 = getVarna(moon1.sign);
-      const varna2 = getVarna(moon2.sign);
+      const varna1 = getVarnaFromSign(moon1.sign);
+      const varna2 = getVarnaFromSign(moon2.sign);
       const varnaOrder = { "Brahmin": 4, "Kshatriya": 3, "Vaisya": 2, "Shudra": 1 };
       const varnaScore = (varnaOrder[varna1] >= varnaOrder[varna2]) ? 1 : 0;
 
@@ -1875,7 +1817,7 @@ const server = http.createServer(async (req, res) => {
         "Horse-Dog": 2, "Dog-Horse": 2,
         "Tiger-Lion": 2, "Lion-Tiger": 2,
         "Buffalo-Sheep": 2, "Sheep-Buffalo": 2,
-        "Snake-Dog": 2, "Dog-Snake": 2,
+        "Serpent-Dog": 2, "Dog-Serpent": 2,
         // Enemy Pairs
         "Horse-Buffalo": 0, "Buffalo-Horse": 0,
         "Elephant-Lion": 0, "Lion-Elephant": 0,
@@ -1975,7 +1917,11 @@ const server = http.createServer(async (req, res) => {
         maxScore: 36,
         percentage: Math.round((totalScore / 36) * 100),
         compatibility: totalScore >= 28 ? "Excellent" : totalScore >= 24 ? "Very Good" : totalScore >= 18 ? "Good" : "Average",
-        totalDisplayScore: (Math.round(totalScore * 10) / 10).toFixed(1), // Added for clarity
+        totalDisplayScore: (Math.round(totalScore * 10) / 10).toFixed(1),
+        debug: {
+          boy: { varna: varna1, vashya: vashya1, tara: tara1, yoni: yoni1, gana: gana1, bhakootSign: moon1.sign, nadi: nadi1 },
+          girl: { varna: varna2, vashya: vashya2, tara: tara2, yoni: yoni2, gana: gana2, bhakootSign: moon2.sign, nadi: nadi2 }
+        },
         details: [
           { name: "Varna (वर्ण)", boyValue: varna1, girlValue: varna2, score: varnaScore, maxScore: 1, areaOfLife: "Work", description: "Spiritual compatibility and ego levels" },
           { name: "Vashya (वश्य)", boyValue: vashya1, girlValue: vashya2, score: vashyaScore, maxScore: 2, areaOfLife: "Dominance", description: "Mutual attraction and control" },
@@ -2231,6 +2177,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
