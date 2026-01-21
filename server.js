@@ -568,22 +568,26 @@ function getYoniFromNakshatra(nakIndex) {
 function getGanaFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
   const ganas = [
-    "Deva", "Manushya", "Rakshasa", "Manushya", "Deva", "Manushya", "Deva", "Deva", "Rakshasa",
-    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Deva", "Rakshasa", "Deva", "Rakshasa",
-    "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Deva"
+    "Devta", "Manushya", "Rakshasa", "Manushya", "Devta", "Manushya", "Devta", "Devta", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Devta", "Rakshasa", "Devta", "Rakshasa", "Devta", "Rakshasa",
+    "Rakshasa", "Manushya", "Manushya", "Devta", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Devta"
   ];
   return ganas[nakIndex - 1] || "Unknown";
 }
 
 function getNadiFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  // Pattern: Adi, Madhya, Antya, Antya, Madhya, Adi (Snake pattern)
-  const nadis = [
-    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya",
-    "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi",
-    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya"
-  ];
-  return nadis[nakIndex - 1] || "Unknown";
+  // Nadi groups: 1, 6, 7, 12, 13, 18, 19, 24, 25 -> Adi
+  //            2, 5, 8, 11, 14, 17, 20, 23, 26 -> Madhya
+  //            3, 4, 9, 10, 15, 16, 21, 22, 27 -> Antya
+  const adi = [1, 6, 7, 12, 13, 18, 19, 24, 25];
+  const madhya = [2, 5, 8, 11, 14, 17, 20, 23, 26];
+  const antya = [3, 4, 9, 10, 15, 16, 21, 22, 27];
+
+  if (adi.includes(nakIndex)) return "Adi";
+  if (madhya.includes(nakIndex)) return "Madhya";
+  if (antya.includes(nakIndex)) return "Antya";
+  return "Unknown";
 }
 
 function getTara(nak1, nak2) {
@@ -598,15 +602,15 @@ function getVarnaFromSign(sign) {
   const varnas = {
     "Cancer": "Brahmin", "Scorpio": "Brahmin", "Pisces": "Brahmin",
     "Aries": "Kshatriya", "Leo": "Kshatriya", "Sagittarius": "Kshatriya",
-    "Taurus": "Vaishya", "Virgo": "Vaishya", "Capricorn": "Vaishya",
-    "Gemini": "Shudra", "Libra": "Shudra", "Aquarius": "Shudra"
+    "Taurus": "Vaisya", "Virgo": "Vaisya", "Capricorn": "Vaisya",
+    "Gemini": "Sudra", "Libra": "Sudra", "Aquarius": "Sudra"
   };
   return varnas[sign] || "Unknown";
 }
 
 function getVashya(moonSign) {
   const vashyas = {
-    "Aries": "Quadruped", "Taurus": "Quadruped", "Leo": "Quadruped",
+    "Aries": "Chatu", "Taurus": "Chatu", "Leo": "Chatu",
     "Gemini": "Manav", "Virgo": "Manav", "Libra": "Manav", "Aquarius": "Manav", "Sagittarius": "Manav",
     "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Jalchar",
     "Scorpio": "Keeta"
@@ -1782,16 +1786,18 @@ const server = http.createServer(async (req, res) => {
 
       const tara1 = getTara(moon1.nakshatra.index, moon2.nakshatra.index);
       const tara2 = getTara(moon2.nakshatra.index, moon1.nakshatra.index);
-      console.log('[Matching] Tara1:', tara1, 'Tara2:', tara2);
-      const goodTaras = ["Sampat", "Kshema", "Sadhak", "Mitra", "Ati-Mitra"];
 
+      const goodTaras = ["Sampat", "Kshema", "Sadhak", "Mitra", "Ati-Mitra"];
       const tara1Score = goodTaras.includes(tara1) ? 1.5 : 0;
       const tara2Score = goodTaras.includes(tara2) ? 1.5 : 0;
       let taraScore = tara1Score + tara2Score;
 
-      // Special case for Janma Tara if Nakshatras belong to same sign but different padas
+      // Special case: if one is Ati-Mitra or Mitra and other is Janma, sometimes points are given
+      // but standard is sum of both.
       if (tara1 === "Janma" && tara2 === "Janma") {
         if (moon1.sign === moon2.sign && moon1.nakshatra.name !== moon2.nakshatra.name) {
+          taraScore = 3;
+        } else if (moon1.nakshatra.name === moon2.nakshatra.name && moon1.nakshatra.pada !== moon2.nakshatra.pada) {
           taraScore = 3;
         }
       }
@@ -1800,73 +1806,68 @@ const server = http.createServer(async (req, res) => {
 
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
-      console.log('[Matching] Yoni1:', yoni1, 'Yoni2:', yoni2);
 
-      // Comprehensive Yoni compatibility table to match AstroSage
+      // AstroSage standard Yoni compatibility matrix
       const yoniCompatibility = {
-        // Same Yoni
-        "Horse-Horse": 4, "Elephant-Elephant": 4, "Sheep-Sheep": 4, "Serpent-Serpent": 4,
-        "Dog-Dog": 4, "Cat-Cat": 4, "Rat-Rat": 4, "Cow-Cow": 4, "Buffalo-Buffalo": 4,
-        "Tiger-Tiger": 4, "Deer-Deer": 4, "Monkey-Monkey": 4, "Lion-Lion": 4, "Mongoose-Mongoose": 4,
-        // Specific Pairs
-        "Cow-Buffalo": 3, "Buffalo-Cow": 3,
-        "Elephant-Sheep": 3, "Sheep-Elephant": 3,
-        "Horse-Elephant": 2, "Elephant-Horse": 2,
-        "Serpent-Rat": 2, "Rat-Serpent": 2,
-        "Dog-Cat": 2, "Cat-Dog": 2,
-        "Horse-Dog": 2, "Dog-Horse": 2,
-        "Tiger-Lion": 2, "Lion-Tiger": 2,
-        "Buffalo-Sheep": 2, "Sheep-Buffalo": 2,
-        "Serpent-Dog": 2, "Dog-Serpent": 2,
-        // Enemy Pairs
-        "Horse-Buffalo": 0, "Buffalo-Horse": 0,
-        "Elephant-Lion": 0, "Lion-Elephant": 0,
-        "Sheep-Monkey": 0, "Monkey-Sheep": 0,
-        "Serpent-Mongoose": 0, "Mongoose-Serpent": 0,
-        "Dog-Deer": 0, "Deer-Dog": 0,
-        "Cat-Rat": 0, "Rat-Cat": 0,
-        "Cow-Tiger": 0, "Tiger-Cow": 0,
-        "Monkey-Tiger": 0, "Tiger-Monkey": 0,
-        "Deer-Horse": 0, "Horse-Deer": 0,
-        "Mongoose-Rat": 0, "Rat-Mongoose": 0
+        "Horse": { "Horse": 4, "Elephant": 2, "Sheep": 2, "Serpent": 1, "Dog": 1, "Cat": 2, "Rat": 1, "Cow": 1, "Buffalo": 0, "Tiger": 1, "Hare": 1, "Monkey": 3, "Lion": 1, "Mongoose": 2, "Deer": 1 },
+        "Elephant": { "Horse": 2, "Elephant": 4, "Sheep": 3, "Serpent": 3, "Dog": 2, "Cat": 2, "Rat": 2, "Cow": 2, "Buffalo": 2, "Tiger": 1, "Hare": 2, "Monkey": 3, "Lion": 0, "Mongoose": 2, "Deer": 1 },
+        "Sheep": { "Horse": 2, "Elephant": 3, "Sheep": 4, "Serpent": 2, "Dog": 1, "Cat": 2, "Rat": 1, "Cow": 3, "Buffalo": 3, "Tiger": 1, "Hare": 2, "Monkey": 0, "Lion": 1, "Mongoose": 2, "Deer": 1 },
+        "Serpent": { "Horse": 1, "Elephant": 3, "Sheep": 2, "Serpent": 4, "Dog": 2, "Cat": 1, "Rat": 2, "Cow": 1, "Buffalo": 1, "Tiger": 1, "Hare": 2, "Monkey": 2, "Lion": 1, "Mongoose": 0, "Deer": 1 },
+        "Dog": { "Horse": 1, "Elephant": 2, "Sheep": 1, "Serpent": 2, "Dog": 4, "Cat": 2, "Rat": 1, "Cow": 2, "Buffalo": 2, "Tiger": 1, "Hare": 0, "Monkey": 2, "Lion": 1, "Mongoose": 2, "Deer": 2 },
+        "Cat": { "Horse": 2, "Elephant": 2, "Sheep": 2, "Serpent": 1, "Dog": 2, "Cat": 4, "Rat": 0, "Cow": 2, "Buffalo": 2, "Tiger": 2, "Hare": 1, "Monkey": 2, "Lion": 1, "Mongoose": 2, "Deer": 1 },
+        "Rat": { "Horse": 1, "Elephant": 2, "Sheep": 1, "Serpent": 2, "Dog": 1, "Cat": 0, "Rat": 4, "Cow": 2, "Buffalo": 2, "Tiger": 2, "Hare": 2, "Monkey": 1, "Lion": 1, "Mongoose": 0, "Deer": 1 },
+        "Cow": { "Horse": 1, "Elephant": 2, "Sheep": 3, "Serpent": 1, "Dog": 2, "Cat": 2, "Rat": 2, "Cow": 4, "Buffalo": 3, "Tiger": 0, "Hare": 1, "Monkey": 2, "Lion": 1, "Mongoose": 2, "Deer": 1 },
+        "Buffalo": { "Horse": 0, "Elephant": 2, "Sheep": 3, "Serpent": 1, "Dog": 2, "Cat": 2, "Rat": 2, "Cow": 3, "Buffalo": 4, "Tiger": 1, "Hare": 2, "Monkey": 2, "Lion": 1, "Mongoose": 2, "Deer": 1 },
+        "Tiger": { "Horse": 1, "Elephant": 1, "Sheep": 1, "Serpent": 1, "Dog": 1, "Cat": 2, "Rat": 2, "Cow": 0, "Buffalo": 1, "Tiger": 4, "Hare": 1, "Monkey": 1, "Lion": 2, "Mongoose": 1, "Deer": 1 },
+        "Hare": { "Horse": 1, "Elephant": 2, "Sheep": 2, "Serpent": 2, "Dog": 0, "Cat": 1, "Rat": 2, "Cow": 1, "Buffalo": 2, "Tiger": 1, "Hare": 4, "Monkey": 2, "Lion": 2, "Mongoose": 2, "Deer": 1 },
+        "Monkey": { "Horse": 3, "Elephant": 3, "Sheep": 0, "Serpent": 2, "Dog": 2, "Cat": 2, "Rat": 1, "Cow": 2, "Buffalo": 2, "Tiger": 1, "Hare": 2, "Monkey": 4, "Lion": 3, "Mongoose": 2, "Deer": 1 },
+        "Lion": { "Horse": 1, "Elephant": 0, "Sheep": 1, "Serpent": 1, "Dog": 1, "Cat": 1, "Rat": 1, "Cow": 1, "Buffalo": 1, "Tiger": 2, "Hare": 2, "Monkey": 3, "Lion": 4, "Mongoose": 2, "Deer": 0 },
+        "Mongoose": { "Horse": 2, "Elephant": 2, "Sheep": 2, "Serpent": 0, "Dog": 2, "Cat": 2, "Rat": 0, "Cow": 2, "Buffalo": 2, "Tiger": 1, "Hare": 2, "Monkey": 2, "Lion": 2, "Mongoose": 4, "Deer": 1 },
+        "Deer": { "Horse": 1, "Elephant": 1, "Sheep": 1, "Serpent": 1, "Dog": 2, "Cat": 1, "Rat": 1, "Cow": 1, "Buffalo": 1, "Tiger": 1, "Hare": 1, "Monkey": 1, "Lion": 0, "Mongoose": 1, "Deer": 4 }
       };
 
-      const yoniKey = `${yoni1}-${yoni2}`;
-      let yoniScore = yoniCompatibility[yoniKey];
-      if (yoniScore === undefined) {
-        if (yoni1 === "Unknown" || yoni2 === "Unknown") yoniScore = 0;
-        else yoniScore = (yoni1 === yoni2) ? 4 : 2; // Default
+      let yoniScore = 2; // Default
+      if (yoniCompatibility[yoni1] && yoniCompatibility[yoni1][yoni2] !== undefined) {
+        yoniScore = yoniCompatibility[yoni1][yoni2];
       }
-      console.log('[Matching] Yoni Score:', yoniScore, 'for', yoniKey);
+      console.log('[Matching] Yoni Score:', yoniScore, 'for', yoni1, '-', yoni2);
 
       const lord1 = getRasiLord(moon1.sign);
       const lord2 = getRasiLord(moon2.sign);
       let grahaMaitriScore = 0;
 
-      // Direct lookup table for all planetary pairs (AstroSage standard)
       const maitriScores = {
-        "Sun-Sun": 5, "Sun-Moon": 5, "Sun-Mars": 5, "Sun-Jupiter": 5, "Sun-Mercury": 4, "Sun-Venus": 0, "Sun-Saturn": 0,
-        "Moon-Sun": 5, "Moon-Moon": 5, "Moon-Mercury": 5, "Moon-Mars": 4, "Moon-Jupiter": 4, "Moon-Venus": 4, "Moon-Saturn": 4,
-        "Mars-Sun": 5, "Mars-Moon": 5, "Mars-Mars": 5, "Mars-Jupiter": 5, "Mars-Venus": 3, "Mars-Saturn": 3, "Mars-Mercury": 0,
-        "Mercury-Sun": 5, "Mercury-Venus": 5, "Mercury-Mercury": 5, "Mercury-Moon": 0, "Mercury-Mars": 4, "Mercury-Jupiter": 0.5, "Mercury-Saturn": 4,
-        "Jupiter-Sun": 5, "Jupiter-Moon": 5, "Jupiter-Mars": 5, "Jupiter-Jupiter": 5, "Jupiter-Mercury": 0.5, "Jupiter-Venus": 0.5, "Jupiter-Saturn": 4,
-        "Venus-Mercury": 5, "Venus-Saturn": 5, "Venus-Venus": 5, "Venus-Mars": 3, "Venus-Jupiter": 3, "Venus-Sun": 0, "Venus-Moon": 0,
-        "Saturn-Mercury": 5, "Saturn-Venus": 5, "Saturn-Saturn": 5, "Saturn-Jupiter": 4, "Saturn-Sun": 0, "Saturn-Moon": 0, "Saturn-Mars": 0
+        "Sun": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 4, "Jupiter": 5, "Venus": 0, "Saturn": 0 },
+        "Moon": { "Sun": 5, "Moon": 5, "Mars": 4, "Mercury": 5, "Jupiter": 4, "Venus": 4, "Saturn": 4 },
+        "Mars": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0, "Jupiter": 5, "Venus": 3, "Saturn": 3 },
+        "Mercury": { "Sun": 5, "Moon": 0, "Mars": 4, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 4 },
+        "Jupiter": { "Sun": 5, "Moon": 5, "Mars": 5, "Mercury": 0.5, "Jupiter": 5, "Venus": 0.5, "Saturn": 4 },
+        "Venus": { "Sun": 0, "Moon": 0, "Mars": 3, "Mercury": 5, "Jupiter": 0.5, "Venus": 5, "Saturn": 5 },
+        "Saturn": { "Sun": 0, "Moon": 0, "Mars": 0, "Mercury": 4, "Jupiter": 4, "Venus": 5, "Saturn": 5 }
       };
 
       const pairKey = `${lord1}-${lord2}`;
-      grahaMaitriScore = maitriScores[pairKey] !== undefined ? maitriScores[pairKey] : 0.5;
+      let grahaMaitriScore = 0;
+      if (maitriScores[lord1] && maitriScores[lord1][lord2] !== undefined) {
+        grahaMaitriScore = maitriScores[lord1][lord2];
+      } else {
+        grahaMaitriScore = 0.5; // Default for unknowns
+      }
 
       const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
+
+      const ganaScoring = {
+        "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 1 },
+        "Manushya": { "Devta": 5, "Manushya": 6, "Rakshasa": 0 },
+        "Rakshasa": { "Devta": 0, "Manushya": 0, "Rakshasa": 6 }
+      };
+
       let ganaScore = 0;
-      if (gana1 === gana2) ganaScore = 6;
-      else if (gana1 === "Deva" && gana2 === "Manushya") ganaScore = 6;
-      else if (gana1 === "Manushya" && gana2 === "Deva") ganaScore = 5;
-      else if (gana1 === "Deva" && gana2 === "Rakshasa") ganaScore = 1;
-      else if (gana1 === "Rakshasa" && gana2 === "Deva") ganaScore = 0;
-      else if (gana1 === "Manushya" && gana2 === "Rakshasa") ganaScore = 0;
-      else if (gana1 === "Rakshasa" && gana2 === "Manushya") ganaScore = 0;
+      if (ganaScoring[gana1] && ganaScoring[gana1][gana2] !== undefined) {
+        ganaScore = ganaScoring[gana1][gana2];
+      }
+      console.log('[Matching] Gana Score:', ganaScore, 'for', gana1, '-', gana2);
 
       // Bhakoot - sign compatibility (AstroSage method)
       const getSignIndex = (sign) => RASHIS.indexOf(sign);
@@ -2177,6 +2178,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
