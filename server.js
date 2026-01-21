@@ -577,15 +577,13 @@ function getGanaFromNakshatra(nakIndex) {
 
 function getNadiFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  // Nadi groups (Adi, Madhya, Antya) in zig-zag order
-  const adi = [1, 6, 7, 12, 13, 18, 19, 24, 25];
-  const madhya = [2, 5, 8, 11, 14, 17, 20, 23, 26];
-  const antya = [3, 4, 9, 10, 15, 16, 21, 22, 27];
-
-  if (adi.includes(nakIndex)) return "Adi";
-  if (madhya.includes(nakIndex)) return "Madhya";
-  if (antya.includes(nakIndex)) return "Antya";
-  return "Unknown";
+  // Pattern: Adi, Madhya, Antya, Antya, Madhya, Adi (Snake pattern)
+  const nadis = [
+    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya",
+    "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi",
+    "Adi", "Madhya", "Antya", "Antya", "Madhya", "Adi", "Adi", "Madhya", "Antya"
+  ];
+  return nadis[nakIndex - 1] || "Unknown";
 }
 
 function getTara(nak1, nak2) {
@@ -1558,37 +1556,36 @@ const server = http.createServer(async (req, res) => {
       };
 
       const getYoni = (nakIndex) => {
-        // Correct Yoni mapping for all 27 Nakshatras (AstroSage compatible)
+        // AstroSage compatible Yoni mapping for all 27 Nakshatras
         const yonis = ["Horse", "Elephant", "Sheep", "Serpent", "Dog", "Cat", "Rat", "Cow",
           "Buffalo", "Tiger", "Hare", "Monkey", "Lion", "Mongoose"];
-        // Mapping: Each Nakshatra to its Yoni animal
         const yoniMap = [
           0,  // 1. Ashwini - Horse
           1,  // 2. Bharani - Elephant
           2,  // 3. Krittika - Sheep
           3,  // 4. Rohini - Serpent
-          4,  // 5. Mrigashira - Serpent
-          5,  // 6. Ardra - Dog
-          6,  // 7. Punarvasu - Cat
-          7,  // 8. Pushya - Sheep
-          8,  // 9. Ashlesha - Cat
-          9,  // 10. Magha - Rat
-          10, // 11. Purva Phalguni - Rat
+          3,  // 5. Mrigashira - Serpent
+          4,  // 6. Ardra - Dog
+          5,  // 7. Punarvasu - Cat
+          2,  // 8. Pushya - Sheep
+          5,  // 9. Ashlesha - Cat
+          6,  // 10. Magha - Rat
+          6,  // 11. Purva Phalguni - Rat
           7,  // 12. Uttara Phalguni - Cow
-          11, // 13. Hasta - Buffalo
-          12, // 14. Chitra - Tiger
-          11, // 15. Swati - Buffalo
-          12, // 16. Vishakha - Tiger
-          13, // 17. Anuradha - Hare
-          13, // 18. Jyeshtha - Hare
+          8,  // 13. Hasta - Buffalo
+          9,  // 14. Chitra - Tiger
+          8,  // 15. Swati - Buffalo
+          9,  // 16. Vishakha - Tiger
+          10, // 17. Anuradha - Hare
+          10, // 18. Jyeshtha - Hare
           4,  // 19. Mula - Dog
-          10, // 20. Purva Ashadha - Monkey
-          10, // 21. Uttara Ashadha - Mongoose
-          10, // 22. Shravana - Monkey
-          9,  // 23. Dhanishta - Lion
+          11, // 20. Purva Ashadha - Monkey
+          12, // 21. Uttara Ashadha - Mongoose
+          11, // 22. Shravana - Monkey
+          12, // 23. Dhanishta - Lion
           0,  // 24. Shatabhisha - Horse
-          9,  // 25. Purva Bhadrapada - Lion
-          9,  // 26. Uttara Bhadrapada - Cow
+          12, // 25. Purva Bhadrapada - Lion
+          7,  // 26. Uttara Bhadrapada - Cow
           1   // 27. Revati - Elephant
         ];
         return yonis[yoniMap[nakIndex - 1]];
@@ -1700,40 +1697,19 @@ const server = http.createServer(async (req, res) => {
       const lord2 = getRasiLord(moon2.sign);
       let grahaMaitriScore = 0;
 
-      const lordIndexMap = { "Sun": 0, "Moon": 1, "Mars": 2, "Mercury": 3, "Jupiter": 4, "Venus": 5, "Saturn": 6 };
+      // Direct lookup table for all planetary pairs (AstroSage standard)
+      const maitriScores = {
+        "Sun-Sun": 5, "Sun-Moon": 5, "Sun-Mars": 5, "Sun-Jupiter": 5, "Sun-Mercury": 4, "Sun-Venus": 0, "Sun-Saturn": 0,
+        "Moon-Sun": 5, "Moon-Moon": 5, "Moon-Mercury": 5, "Moon-Mars": 4, "Moon-Jupiter": 4, "Moon-Venus": 4, "Moon-Saturn": 4,
+        "Mars-Sun": 5, "Mars-Moon": 5, "Mars-Mars": 5, "Mars-Jupiter": 5, "Mars-Venus": 3, "Mars-Saturn": 3, "Mars-Mercury": 0,
+        "Mercury-Sun": 5, "Mercury-Venus": 5, "Mercury-Mercury": 5, "Mercury-Moon": 0, "Mercury-Mars": 4, "Mercury-Jupiter": 0.5, "Mercury-Saturn": 4,
+        "Jupiter-Sun": 5, "Jupiter-Moon": 5, "Jupiter-Mars": 5, "Jupiter-Jupiter": 5, "Jupiter-Mercury": 0.5, "Jupiter-Venus": 0.5, "Jupiter-Saturn": 4,
+        "Venus-Mercury": 5, "Venus-Saturn": 5, "Venus-Venus": 5, "Venus-Mars": 3, "Venus-Jupiter": 3, "Venus-Sun": 0, "Venus-Moon": 0,
+        "Saturn-Mercury": 5, "Saturn-Venus": 5, "Saturn-Saturn": 5, "Saturn-Jupiter": 4, "Saturn-Sun": 0, "Saturn-Moon": 0, "Saturn-Mars": 0
+      };
 
-      // Standard Vedic Friendship Matrix (5:F/F, 4:F/N, 3:N/N, 1:F/E, 0.5:N/E, 0:E/E)
-      const maitriMatrix = [
-        [5, 5, 5, 4, 5, 0, 0],   // Sun
-        [5, 5, 4, 5, 4, 3, 3],   // Moon
-        [5, 4, 5, 0, 5, 3, 3],   // Mars
-        [5, 1, 3, 5, 3, 5, 3],   // Mercury
-        [5, 5, 5, 1, 5, 1, 3],   // Jupiter
-        [1, 1, 3, 5, 3, 5, 5],   // Venus
-        [1, 1, 0, 5, 3, 5, 5]    // Saturn
-      ];
-
-      if (lord1 === lord2) {
-        grahaMaitriScore = 5;
-      } else {
-        const i1 = lordIndexMap[lord1];
-        const i2 = lordIndexMap[lord2];
-        if (i1 !== undefined && i2 !== undefined) {
-          grahaMaitriScore = maitriMatrix[i1][i2]; // Single lookup usually suffices if matrix is averaged or standard
-          // Better logic: use the specific score for that pair from standard table
-          const relationshipScores = {
-            "Sun-Moon": 5, "Sun-Mars": 5, "Sun-Jupiter": 5, "Sun-Mercury": 4, "Sun-Venus": 0, "Sun-Saturn": 0,
-            "Moon-Sun": 5, "Moon-Mercury": 4, "Moon-Mars": 4, "Moon-Jupiter": 4, "Moon-Venus": 4, "Moon-Saturn": 4,
-            "Mars-Sun": 5, "Mars-Moon": 5, "Mars-Jupiter": 5, "Mars-Mercury": 0, "Mars-Venus": 3, "Mars-Saturn": 3,
-            "Mercury-Sun": 5, "Mercury-Venus": 5, "Mercury-Moon": 0, "Mercury-Mars": 3, "Mercury-Jupiter": 3, "Mercury-Saturn": 3,
-            "Jupiter-Sun": 5, "Jupiter-Moon": 5, "Jupiter-Mars": 5, "Jupiter-Mercury": 0.5, "Jupiter-Venus": 0.5, "Jupiter-Saturn": 3,
-            "Venus-Mercury": 5, "Venus-Saturn": 5, "Venus-Mars": 3, "Venus-Jupiter": 3, "Venus-Sun": 0, "Venus-Moon": 0,
-            "Saturn-Mercury": 5, "Saturn-Venus": 5, "Saturn-Jupiter": 3, "Saturn-Sun": 0, "Saturn-Moon": 0, "Saturn-Mars": 0
-          };
-          const pairKey = `${lord1}-${lord2}`;
-          grahaMaitriScore = relationshipScores[pairKey] !== undefined ? relationshipScores[pairKey] : 0.5;
-        }
-      }
+      const pairKey = `${lord1}-${lord2}`;
+      grahaMaitriScore = maitriScores[pairKey] !== undefined ? maitriScores[pairKey] : 0.5;
 
       const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
@@ -2051,6 +2027,7 @@ server.listen(PORT, () => {
   console.log(`  - POST /whatsapp/disconnect`);
   console.log(`  - POST /whatsapp/reconnect`);
 });
+
 
 
 
