@@ -1961,9 +1961,9 @@ const server = http.createServer(async (req, res) => {
         "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 0 },
         "Shwan": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Marjar": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
-        "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 3, "Mahish": 3, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
+        "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
         "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 2, "Nakul": 2 },
         "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
@@ -2003,17 +2003,12 @@ const server = http.createServer(async (req, res) => {
       if ([2, 12, 5, 9, 6, 8].includes(signDistance)) {
         bhakootScore = 0;
         // CANCELLATION RULES:
-        // 1. Same Rashi Lord (e.g. Aries/Scorpio, Taurus/Libra)
-        if (lord1 === lord2) bhakootScore = 7;
-        // 2. Mutual friends (Sun/Moon, Jupiter/Mars, etc.)
-        const mutualFriends = [
-          ["Sun", "Moon"], ["Sun", "Mars"], ["Sun", "Jupiter"],
-          ["Moon", "Mercury"], ["Mars", "Jupiter"], ["Venus", "Saturn"], ["Venus", "Mercury"]
-        ];
-        const areFriends = mutualFriends.some(pair =>
-          (pair.includes(lord1) && pair.includes(lord2))
+        // 1. Same Rashi Lord (Aries/Scorpio, Taurus/Libra only)
+        const sameLordSigns = [["Aries", "Scorpio"], ["Taurus", "Libra"]];
+        const isSameLordCancelled = sameLordSigns.some(pair =>
+          (pair.includes(moon1.sign) && pair.includes(moon2.sign))
         );
-        if (areFriends) bhakootScore = 7;
+        if (isSameLordCancelled) bhakootScore = 7;
       }
 
       const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
@@ -2069,6 +2064,8 @@ const server = http.createServer(async (req, res) => {
           name: person1.name,
           ascendant: kundali1.ascendant.sign,
           moonSign: moon1.sign,
+          ishtaKaal: kundali1.enhancedDetails.ishtaKaal,
+          nakshatraPaya: kundali1.enhancedDetails.nakshatraPaya,
           chart: generateSimpleChart(kundali1.ascendant.sign)
         },
         girlDetails: {
@@ -2082,6 +2079,8 @@ const server = http.createServer(async (req, res) => {
           name: person2.name,
           ascendant: kundali2.ascendant.sign,
           moonSign: moon2.sign,
+          ishtaKaal: kundali2.enhancedDetails.ishtaKaal,
+          nakshatraPaya: kundali2.enhancedDetails.nakshatraPaya,
           chart: generateSimpleChart(kundali2.ascendant.sign)
         },
         recommendation: totalScore >= 28
