@@ -695,8 +695,10 @@ function getRahuKaal(dayOfWeek) {
 }
 
 // Calculate accurate sunrise and sunset times using Swiss Ephemeris
-function calculateSunriseSunset(jdUt, latitude, longitude) {
+function calculateSunriseSunset(jdUt, latitude, longitude, timezoneOffset = 5.5) {
   try {
+    console.log('[astro-engine] Calculating sunrise/sunset for:', { jdUt, latitude, longitude, timezoneOffset });
+
     // Calculate sunrise
     const sunriseResult = sweph.rise_trans(
       jdUt,
@@ -721,25 +723,43 @@ function calculateSunriseSunset(jdUt, latitude, longitude) {
       constants.SE_CALC_SET | constants.SE_BIT_DISC_CENTER
     );
 
-    const formatTime = (jd) => {
-      if (!jd || jd === 0) return null;
-      // Convert JD to local time
-      const date = new Date((jd - 2440587.5) * 86400000); // Convert JD to Unix timestamp
-      const hours = date.getUTCHours();
-      const minutes = date.getUTCMinutes();
+    console.log('[astro-engine] Sunrise result:', sunriseResult);
+    console.log('[astro-engine] Sunset result:', sunsetResult);
+
+    const formatTime = (jd, tzOffset) => {
+      if (!jd || jd === 0) {
+        console.log('[astro-engine] Invalid JD for time formatting:', jd);
+        return null;
+      }
+
+      // Convert JD to UTC date
+      const utcDate = new Date((jd - 2440587.5) * 86400000);
+
+      // Add timezone offset to get local time
+      const localDate = new Date(utcDate.getTime() + tzOffset * 3600000);
+
+      const hours = localDate.getUTCHours();
+      const minutes = localDate.getUTCMinutes();
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const displayHours = hours % 12 || 12;
-      return `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+
+      const timeStr = `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+      console.log('[astro-engine] Formatted time:', timeStr, 'from JD:', jd);
+      return timeStr;
     };
 
+    const sunriseTime = sunriseResult.data ? formatTime(sunriseResult.data, timezoneOffset) : null;
+    const sunsetTime = sunsetResult.data ? formatTime(sunsetResult.data, timezoneOffset) : null;
+
     return {
-      sunrise: sunriseResult.data ? formatTime(sunriseResult.data) : '06:00 AM',
-      sunset: sunsetResult.data ? formatTime(sunsetResult.data) : '06:00 PM',
+      sunrise: sunriseTime || '06:00 AM',
+      sunset: sunsetTime || '06:00 PM',
       sunriseJD: sunriseResult.data || jdUt,
       sunsetJD: sunsetResult.data || jdUt
     };
   } catch (error) {
     console.error('[astro-engine] Error calculating sunrise/sunset:', error);
+    console.error('[astro-engine] Error stack:', error.stack);
     return {
       sunrise: '06:00 AM',
       sunset: '06:00 PM',
@@ -1543,8 +1563,8 @@ function computeKundali(payload) {
       })(),
       ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
       ...(() => {
-        // Calculate accurate sunrise/sunset
-        const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude);
+        // Calculate accurate sunrise/sunset with timezone
+        const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude, inputs.timezone);
         const sunriseDate = new Date((sunTimes.sunriseJD - 2440587.5) * 86400000);
         const sunsetDate = new Date((sunTimes.sunsetJD - 2440587.5) * 86400000);
 
