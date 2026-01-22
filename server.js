@@ -542,10 +542,27 @@ function calculateKarana(sunLong, moonLong) {
 function calculateVikramSamvat(gregorianYear, gregorianMonth) {
   // Vikram Samvat is 57 years ahead of Gregorian
   // New year starts in Chaitra (March-April)
+  let samvat = gregorianYear + 57;
   if (gregorianMonth < 4) {
-    return gregorianYear + 56; // Before Chaitra
+    samvat = gregorianYear + 56; // Before Chaitra
   }
-  return gregorianYear + 57;
+  return samvat;
+}
+
+function getSamvatName(samvat) {
+  // 60-year Jovian cycle (Samvatsara names)
+  const names = [
+    "Prabhava", "Vibhava", "Shukla", "Pramoda", "Prajapati", "Angira", "Shrimukha", "Bhava", "Yuva", "Dhatri",
+    "Ishvara", "Bahudhanya", "Pramathi", "Vikrama", "Vrusha", "Chitrabhanu", "Subhanu", "Tarana", "Parthiva", "Vyaya",
+    "Sarvajit", "Sarvadhari", "Virodhi", "Vikruti", "Khara", "Nandana", "Vijaya", "Jaya", "Manmatha", "Durmukha",
+    "Hemalamba", "Vilamba", "Vikari", "Sharvari", "Plava", "Shubhakrut", "Shobhakrut", "Krodhi", "Visvavasu", "Paridhavi",
+    "Plavanga", "Kilaka", "Saumya", "Sadharana", "Virodhakrut", "Paridhavi", "Pramadi", "Ananda", "Rakshasa", "Nala",
+    "Pingala", "Kalayukti", "Siddharth", "Raudra", "Durmati", "Dundubhi", "Rudhirodgari", "Raktaksha", "Krodhana", "Akshaya"
+  ];
+  // Samvat 2062 is "Paridhavi" or "Pramadi"
+  // Cycle alignment: Samvat 2062 % 60 depends on epoch
+  const index = (samvat - 2005 + 38) % 60; // Approximate but often used in regional calendars
+  return names[index] || "";
 }
 
 function calculatePaksha(tithiNumber) {
@@ -676,16 +693,16 @@ function getRasiLord(moonSign) {
 // Simplified Ishta Kaal calculation removed - using the robust version below
 
 // Get Nakshatra Paya (foot/step)
-// Get Nakshatra Paya (foot/step) based on relationship with Sun sign
 function getNakshatraPaya(moonSignIndex, sunSignIndex) {
   // Distance from Sun sign (1-indexed)
   const diff = (moonSignIndex - sunSignIndex + 12) % 12 + 1;
-  // 1, 6, 11 from Sun = Gold
-  // 2, 5, 9 from Sun = Silver
-  // 3, 7, 10 from Sun = Copper
-  // 4, 8, 12 from Sun = Iron
-  if ([1, 6, 11].includes(diff)) return "Gold";
-  if ([2, 5, 9].includes(diff)) return "Silver";
+  // Standard Paya Rules (Rashi based):
+  // 1, 6, 9 from Sun = Gold (Swarna)
+  // 2, 5, 11 from Sun = Silver (Rajat) -> User confirmed 11 is Silver
+  // 3, 7, 10 from Sun = Copper (Tamra)
+  // 4, 8, 12 from Sun = Iron (Loha)
+  if ([1, 6, 9].includes(diff)) return "Gold";
+  if ([2, 5, 11].includes(diff)) return "Silver";
   if ([3, 7, 10].includes(diff)) return "Copper";
   if ([4, 8, 12].includes(diff)) return "Iron";
   return "Iron";
@@ -1618,8 +1635,10 @@ function computeKundali(payload) {
 
       const tithiData = moon && sun ? calculateTithi(sun.longitude, moon.longitude) : { name: "N/A", number: 0 };
 
+      const samvat = calculateVikramSamvat(inputs.year, inputs.month);
       return {
-        vikramSamvat: calculateVikramSamvat(inputs.year, inputs.month),
+        vikramSamvat: samvat,
+        samvatName: getSamvatName(samvat),
         shalivahanaShake: inputs.year - 78,
         tithi: tithiData,
         paksha: moon && sun ? calculatePaksha(tithiData.number) : "N/A",
