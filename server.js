@@ -639,11 +639,20 @@ function getVarnaFromSign(sign) {
 }
 
 function getVashya(moonSign) {
+  // Vashya types according to AstroSage standard
   const vashyas = {
-    "Aries": "Chatu", "Taurus": "Chatu", "Leo": "Chatu",
-    "Gemini": "Manav", "Virgo": "Manav", "Libra": "Manav", "Aquarius": "Manav", "Sagittarius": "Manav",
-    "Cancer": "Jalchar", "Pisces": "Jalchar", "Capricorn": "Chatu",
-    "Scorpio": "Keeta"
+    "Aries": "Chatu",      // Quadruped
+    "Taurus": "Vanchar",   // Forest dweller (NOT Chatu)
+    "Gemini": "Manav",     // Human
+    "Cancer": "Jalchar",   // Water creature
+    "Leo": "Chatu",        // Quadruped
+    "Virgo": "Manav",      // Human
+    "Libra": "Manav",      // Human
+    "Scorpio": "Keeta",    // Insect
+    "Sagittarius": "Manav", // Human
+    "Capricorn": "Vanchar", // Forest dweller
+    "Aquarius": "Manav",   // Human
+    "Pisces": "Jalchar"    // Water creature
   };
   return vashyas[moonSign] || "Unknown";
 }
