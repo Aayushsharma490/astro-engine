@@ -517,21 +517,26 @@ function calculateKarana(sunLong, moonLong) {
   const elongation = normalizeDegree(moonLong - sunLong);
   const karanaNumber = Math.floor(elongation / 6) + 1; // 1-60
 
-  // 11 Karanas: 4 fixed + 7 movable (repeated 8 times)
+  // 11 Karanas: indices 0-6 are movable, 7-10 are fixed
   const karanaNames = [
-    "Bava", "Balava", "Kaulava", "Taitila", "Garija",
+    "Bava", "Balava", "Kaulava", "Taitila", "Garaja",
     "Vanija", "Vishti", "Shakuni", "Chatushpada", "Naga", "Kimstughna"
   ];
 
-  // First 4 are fixed, then 7 movable repeat
   let karanaIndex;
-  if (karanaNumber <= 57) {
-    karanaIndex = ((karanaNumber - 1) % 7);
-  } else {
-    karanaIndex = 7 + (karanaNumber - 58); // Fixed karanas at end
+  if (karanaNumber === 1) {
+    karanaIndex = 10; // Kimstughna (Fixed)
+  } else if (karanaNumber <= 57) {
+    karanaIndex = (karanaNumber - 2) % 7; // Movable: Bava to Vishti
+  } else if (karanaNumber === 58) {
+    karanaIndex = 7; // Shakuni (Fixed)
+  } else if (karanaNumber === 59) {
+    karanaIndex = 8; // Chatushpada (Fixed)
+  } else if (karanaNumber === 60) {
+    karanaIndex = 9; // Naga (Fixed)
   }
 
-  return karanaNames[karanaIndex % 11];
+  return karanaNames[karanaIndex];
 }
 
 function calculateVikramSamvat(gregorianYear, gregorianMonth) {
@@ -708,26 +713,40 @@ function getRahuKaal(dayOfWeek) {
 function calculateIshtaKaal(birthTimeFull, sunriseTimeStr) {
   try {
     // birthTimeFull: ISO string like "2007-06-11T07:00:00"
-    // sunriseTimeStr: "HH:MM:SS"
+    // sunriseTimeStr: "HH:MM AM/PM" or "HH:MM:SS"
     if (!sunriseTimeStr || sunriseTimeStr === "N/A") return "N/A";
 
     const birthPart = birthTimeFull.split('T')[1];
     if (!birthPart) return "N/A";
 
     const [bH, bM, bS] = birthPart.split(':').map(Number);
-    const [sH, sM, sS] = sunriseTimeStr.split(':').map(Number);
+
+    // Parse sunriseTimeStr (e.g., "05:30 AM")
+    let sH, sM, sS = 0;
+    if (sunriseTimeStr.includes('AM') || sunriseTimeStr.includes('PM')) {
+      const [time, ampm] = sunriseTimeStr.split(' ');
+      const [h, m] = time.split(':').map(Number);
+      sH = h;
+      sM = m;
+      if (ampm === 'PM' && sH < 12) sH += 12;
+      if (ampm === 'AM' && sH === 12) sH = 0;
+    } else {
+      [sH, sM, sS] = sunriseTimeStr.split(':').map(Number);
+    }
 
     let birthSecs = bH * 3600 + bM * 60 + bS;
-    let sunriseSecs = sH * 3600 + sM * 60 + sS;
+    let sunriseSecs = sH * 3600 + sM * 60 + (sS || 0);
 
     let diffSecs = birthSecs - sunriseSecs;
     if (diffSecs < 0) diffSecs += 24 * 3600;
 
-    const h = Math.floor(diffSecs / 3600);
-    const m = Math.floor((diffSecs % 3600) / 60);
-    const s = Math.floor(diffSecs % 60);
+    const ghantis = diffSecs / 3600 * 2.5; // Ghantis = 2.5 * hours
+    const g = Math.floor(ghantis);
+    const mTotal = (ghantis - g) * 60;
+    const m = Math.floor(mTotal);
+    const s = Math.round((mTotal - m) * 60);
 
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${g.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   } catch (e) {
     return "N/A";
   }
@@ -1625,6 +1644,10 @@ function computeKundali(payload) {
           return 'Shishir (Winter)';
         })(),
         ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
+        moonSign: moon ? moon.sign : "N/A",
+        nakshatra: moon ? moon.nakshatra.name : "N/A",
+        nakshatraPada: moon ? moon.nakshatra.pada : "N/A",
+        lagna: RASHIS[ascSignIndex],
         sunrise: sunTimes.sunrise,
         sunset: sunTimes.sunset,
         dayDuration: formatDuration(dayDurationMs),
