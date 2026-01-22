@@ -549,15 +549,26 @@ function calculatePaksha(tithiNumber) {
 }
 
 function calculateMasa(moonLong, sunLong) {
-  // Masa is based on Sun's position in zodiac
+  // Masa is determined by Sun's position in the zodiac
+  // Chaitra starts when Sun enters Aries (Mesha)
   const sunSignIndex = getSignIndex(sunLong);
+
+  // Hindu months aligned with zodiac signs (starting from Aries = Chaitra)
   const masaNames = [
-    "Chaitra", "Vaishakha", "Jyeshtha", "Ashadha",
-    "Shravana", "Bhadrapada", "Ashwin", "Kartik",
-    "Margashirsha", "Pausha", "Magha", "Phalguna"
+    "Chaitra",      // Aries (Mesha) - March/April
+    "Vaishakha",    // Taurus (Vrishabha) - April/May
+    "Jyeshtha",     // Gemini (Mithuna) - May/June
+    "Ashadha",      // Cancer (Karka) - June/July
+    "Shravana",     // Leo (Simha) - July/August
+    "Bhadrapada",   // Virgo (Kanya) - August/September
+    "Ashwin",       // Libra (Tula) - September/October
+    "Kartik",       // Scorpio (Vrishchika) - October/November
+    "Margashirsha", // Sagittarius (Dhanu) - November/December
+    "Pausha",       // Capricorn (Makara) - December/January
+    "Magha",        // Aquarius (Kumbha) - January/February
+    "Phalguna"      // Pisces (Meena) - February/March
   ];
 
-  // Adjust for solar month starting from Aries
   return masaNames[sunSignIndex];
 }
 
@@ -681,6 +692,61 @@ function getRahuKaal(dayOfWeek) {
     "Saturday": "9:00 AM - 10:30 AM"
   };
   return rahuKaalPeriods[dayOfWeek] || "N/A";
+}
+
+// Calculate accurate sunrise and sunset times using Swiss Ephemeris
+function calculateSunriseSunset(jdUt, latitude, longitude) {
+  try {
+    // Calculate sunrise
+    const sunriseResult = sweph.rise_trans(
+      jdUt,
+      constants.SE_SUN,
+      longitude,
+      latitude,
+      0, // sea level
+      0, // atmospheric pressure (0 = standard)
+      0, // temperature (0 = standard)
+      constants.SE_CALC_RISE | constants.SE_BIT_DISC_CENTER
+    );
+
+    // Calculate sunset
+    const sunsetResult = sweph.rise_trans(
+      jdUt,
+      constants.SE_SUN,
+      longitude,
+      latitude,
+      0,
+      0,
+      0,
+      constants.SE_CALC_SET | constants.SE_BIT_DISC_CENTER
+    );
+
+    const formatTime = (jd) => {
+      if (!jd || jd === 0) return null;
+      // Convert JD to local time
+      const date = new Date((jd - 2440587.5) * 86400000); // Convert JD to Unix timestamp
+      const hours = date.getUTCHours();
+      const minutes = date.getUTCMinutes();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
+      return `${String(displayHours).padStart(2, '0')}:${String(minutes).padStart(2, '0')} ${ampm}`;
+    };
+
+    return {
+      sunrise: sunriseResult.data ? formatTime(sunriseResult.data) : '06:00 AM',
+      sunset: sunsetResult.data ? formatTime(sunsetResult.data) : '06:00 PM',
+      sunriseJD: sunriseResult.data || jdUt,
+      sunsetJD: sunsetResult.data || jdUt
+    };
+  } catch (error) {
+    console.error('[astro-engine] Error calculating sunrise/sunset:', error);
+    return {
+      sunrise: '06:00 AM',
+      sunset: '06:00 PM',
+      sunriseJD: jdUt,
+      sunsetJD: jdUt
+    };
+  }
 }
 
 // Helper functions for Auspicious Suggestions
@@ -1476,10 +1542,29 @@ function computeKundali(payload) {
         return 'Shishir (Winter)';
       })(),
       ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
-      sunrise: '06:00 AM',
-      sunset: '06:00 PM',
-      dayDuration: '12h 00m',
-      nightDuration: '12h 00m',
+      ...(() => {
+        // Calculate accurate sunrise/sunset
+        const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude);
+        const sunriseDate = new Date((sunTimes.sunriseJD - 2440587.5) * 86400000);
+        const sunsetDate = new Date((sunTimes.sunsetJD - 2440587.5) * 86400000);
+
+        // Calculate day/night duration
+        const dayDurationMs = sunsetDate - sunriseDate;
+        const nightDurationMs = 24 * 60 * 60 * 1000 - dayDurationMs;
+
+        const formatDuration = (ms) => {
+          const hours = Math.floor(ms / (1000 * 60 * 60));
+          const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+          return `${hours}h ${minutes}m`;
+        };
+
+        return {
+          sunrise: sunTimes.sunrise,
+          sunset: sunTimes.sunset,
+          dayDuration: formatDuration(dayDurationMs),
+          nightDuration: formatDuration(nightDurationMs),
+        };
+      })(),
       moonrise: '07:30 PM',
       moonset: '06:30 AM',
       lagnaAtSunrise: RASHIS[ascSignIndex],
@@ -1496,7 +1581,6 @@ function computeKundali(payload) {
       nakshatraSwami: moon ? moon.nakshatra.lord : null,
       ishtaKaal: calculateIshtaKaal(ascDegree, ascDegree), // Simplified
       rahuKaal: getRahuKaal(new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' })),
-      sunriseTime: "06:00 AM", // Calculated based on location (simplified for now)
       remainingDasha: vimshottariDasha.current ? `${vimshottariDasha.current.planet} Dasha remaining: ${Math.max(0, (new Date(vimshottariDasha.current.endDate).getTime() - new Date(utcIsoString).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : "N/A",
       // Namakshar (first letter of name based on Nakshatra Pada)
       namakshar: moon ? getNamaksharFromNakshatra(moon.nakshatra.name, moon.nakshatra.pada) : null,
