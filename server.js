@@ -611,7 +611,7 @@ function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
   // AstroSage-compatible Sanskrit Yoni names
   const yonis = [
-    "Ashwa", "Gaja", "Mesha", "Sarpa", "Sarpa", "Shwan", "Marjar", "Mesha", "Marjar",
+    "Ashwa", "Gaja", "Chaga", "Sarpa", "Sarpa", "Shwan", "Marjar", "Chaga", "Marjar",
     "Mushak", "Mushak", "Gau", "Mahish", "Vyaghra", "Mahish", "Vyaghra", "Mriga", "Mriga",
     "Shwan", "Vanar", "Nakul", "Vanar", "Simha", "Ashwa", "Simha", "Gau", "Gaja"
   ];
@@ -661,8 +661,15 @@ function getVarnaFromSign(sign) {
   return varnas[sign] || "Unknown";
 }
 
-function getVashya(moonSign) {
-  // Vashya types according to AstroSage standard
+function getVashya(moonSign, degree) {
+  // Vashya types with splitting for Sagittarius and Capricorn
+  if (moonSign === "Sagittarius") {
+    return degree < 15 ? "Manav" : "Chatu";
+  }
+  if (moonSign === "Capricorn") {
+    return degree < 15 ? "Chatu" : "Jalchar";
+  }
+
   const vashyas = {
     "Aries": "Chatu",
     "Taurus": "Chatu",
@@ -672,8 +679,6 @@ function getVashya(moonSign) {
     "Virgo": "Manav",
     "Libra": "Manav",
     "Scorpio": "Keeta",
-    "Sagittarius": "Manav",
-    "Capricorn": "Jalchar",
     "Aquarius": "Manav",
     "Pisces": "Jalchar"
   };
@@ -753,11 +758,20 @@ function calculateIshtaKaal(birthTimeFull, sunriseTimeStr) {
     let diffSecs = birthSecs - sunriseSecs;
     if (diffSecs < 0) diffSecs += 24 * 3600;
 
-    const ghantis = diffSecs / 3600 * 2.5; // Ghantis = 2.5 * hours
+    const ghantis = (diffSecs / 3600) * 2.5; // Ghantis = 2.5 * hours
     const g = Math.floor(ghantis);
     const mTotal = (ghantis - g) * 60;
-    const m = Math.floor(mTotal);
-    const s = Math.round((mTotal - m) * 60);
+    let m = Math.floor(mTotal);
+    let s = Math.round((mTotal - m) * 60);
+
+    if (s >= 60) {
+      s -= 60;
+      m += 1;
+    }
+    if (m >= 60) {
+      m -= 60;
+      // Note: g doesn't carry over here because Ishta Kaal is usually just ghantis:palas:vipalas
+    }
 
     return `${g.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   } catch (e) {
@@ -769,7 +783,7 @@ function calculateSunriseSunset(jdUt, latitude, longitude, timezoneOffset = 5.5)
   try {
     console.log('[astro-engine] Calculating sunrise/sunset for:', { jdUt, latitude, longitude, timezoneOffset });
 
-    const geopos = [longitude, latitude, 0];
+    const geopos = [longitude, latitude, 500]; // Use 500m as default elevation for better accuracy than 0m
     const epheFlag = constants.SEFLG_SWIEPH;
 
     // Calculate sunrise
@@ -778,7 +792,7 @@ function calculateSunriseSunset(jdUt, latitude, longitude, timezoneOffset = 5.5)
       constants.SE_SUN,
       "",  // starname
       epheFlag,
-      constants.SE_CALC_RISE | constants.SE_BIT_DISC_CENTER, // rsmi
+      constants.SE_CALC_RISE | constants.SE_BIT_DISC_BOTTOM, // rsmi - Switch to visible sunrise (bottom/upper limb) for accuracy 64: constants.SE_CALC_RISE | constants.SE_BIT_DISC_BOTTOM
       geopos,
       0, // atpress
       0  // attemp
@@ -1619,8 +1633,10 @@ function computeKundali(payload) {
     },
     dashas: vimshottariDasha,
     enhancedDetails: (() => {
-      // Calculate accurate sunrise/sunset with timezone
-      const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude, inputs.timezone);
+      // Calculate accurate sunrise/sunset with timezone and elevation
+      // Adjust jdUt to search from midnight of the birth date to find correct sunrise
+      const localMidnightJD = Math.floor(jdUt + inputs.timezone / 24 - 0.5) + 0.5 - inputs.timezone / 24;
+      const sunTimes = calculateSunriseSunset(localMidnightJD, inputs.latitude, inputs.longitude, inputs.timezone);
       const sunriseDate = new Date((sunTimes.sunriseJD - 2440587.5) * 86400000);
       const sunsetDate = new Date((sunTimes.sunsetJD - 2440587.5) * 86400000);
 
@@ -1938,13 +1954,13 @@ const server = http.createServer(async (req, res) => {
       const varnaOrder = { "Brahmin": 4, "Kshatriya": 3, "Vaisya": 2, "Sudra": 1 };
       const varnaScore = (varnaOrder[varna1] >= varnaOrder[varna2]) ? 1 : 0;
 
-      const vashya1 = getVashya(moon1.sign);
-      const vashya2 = getVashya(moon2.sign);
+      const vashya1 = getVashya(moon1.sign, moon1.degreeInSign);
+      const vashya2 = getVashya(moon2.sign, moon2.degreeInSign);
 
       const vashyaMatrix = {
         "Chatu": { "Chatu": 2, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 1 },
-        "Manav": { "Chatu": 1, "Manav": 2, "Jalchar": 1.5, "Vanchar": 0, "Keeta": 1 },
-        "Jalchar": { "Chatu": 1, "Manav": 1.5, "Jalchar": 2, "Vanchar": 1, "Keeta": 1 },
+        "Manav": { "Chatu": 1, "Manav": 2, "Jalchar": 0.5, "Vanchar": 0, "Keeta": 1 },
+        "Jalchar": { "Chatu": 1, "Manav": 0.5, "Jalchar": 2, "Vanchar": 1, "Keeta": 1 },
         "Vanchar": { "Chatu": 0, "Manav": 0, "Jalchar": 1, "Vanchar": 2, "Keeta": 0 },
         "Keeta": { "Chatu": 1, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 2 }
       };
@@ -2022,8 +2038,8 @@ const server = http.createServer(async (req, res) => {
       if ([2, 12, 5, 9, 6, 8].includes(signDistance)) {
         bhakootScore = 0;
         // CANCELLATION RULES:
-        // 1. Same Rashi Lord (Aries/Scorpio, Taurus/Libra only)
-        const sameLordSigns = [["Aries", "Scorpio"], ["Taurus", "Libra"]];
+        // 1. Same Rashi Lord
+        const sameLordSigns = [["Aries", "Scorpio"], ["Taurus", "Libra"], ["Capricorn", "Aquarius"], ["Sagittarius", "Pisces"], ["Gemini", "Virgo"]];
         const isSameLordCancelled = sameLordSigns.some(pair =>
           (pair.includes(moon1.sign) && pair.includes(moon2.sign))
         );
