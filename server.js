@@ -737,30 +737,31 @@ function calculateSunriseSunset(jdUt, latitude, longitude, timezoneOffset = 5.5)
   try {
     console.log('[astro-engine] Calculating sunrise/sunset for:', { jdUt, latitude, longitude, timezoneOffset });
 
+    const geopos = [longitude, latitude, 0];
+    const epheFlag = constants.SEFLG_SWIEPH;
+
     // Calculate sunrise
     const sunriseResult = sweph.rise_trans(
       jdUt,
       constants.SE_SUN,
-      "",  // starname (empty string for planets)
-      longitude,
-      latitude,
-      0, // altitude (sea level)
-      0, // atmospheric pressure (0 = standard)
-      0, // temperature (0 = standard)
-      constants.SE_CALC_RISE | constants.SE_BIT_DISC_CENTER
+      "",  // starname
+      epheFlag,
+      constants.SE_CALC_RISE | constants.SE_BIT_DISC_CENTER, // rsmi
+      geopos,
+      0, // atpress
+      0  // attemp
     );
 
     // Calculate sunset
     const sunsetResult = sweph.rise_trans(
       jdUt,
       constants.SE_SUN,
-      "",  // starname (empty string for planets)
-      longitude,
-      latitude,
+      "",
+      epheFlag,
+      constants.SE_CALC_SET | constants.SE_BIT_DISC_CENTER,
+      geopos,
       0,
-      0,
-      0,
-      constants.SE_CALC_SET | constants.SE_BIT_DISC_CENTER
+      0
     );
 
     console.log('[astro-engine] Sunrise result:', sunriseResult);
@@ -1585,70 +1586,68 @@ function computeKundali(payload) {
       },
     },
     dashas: vimshottariDasha,
-    enhancedDetails: {
-      vikramSamvat: calculateVikramSamvat(inputs.year, inputs.month),
-      shalivahanaShake: inputs.year - 78,
-      tithi: moon && sun ? calculateTithi(sun.longitude, moon.longitude) : null,
-      paksha: moon && sun ? calculatePaksha(calculateTithi(sun.longitude, moon.longitude).number) : null,
-      masa: moon && sun ? calculateMasa(moon.longitude, sun.longitude) : null,
-      yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : null,
-      karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : null,
-      dayOfWeek: new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' }),
-      chandraRashi: moon ? moon.sign : null,
-      suryaRashi: sun ? sun.sign : null,
-      brihaspatiRashi: enrichedPlanets.find(p => p.name === 'Jupiter')?.sign || 'N/A',
-      ritu: (() => {
-        const m = inputs.month;
-        if (m >= 3 && m <= 4) return 'Vasant (Spring)';
-        if (m >= 5 && m <= 6) return 'Grishma (Summer)';
-        if (m >= 7 && m <= 8) return 'Varsha (Monsoon)';
-        if (m >= 9 && m <= 10) return 'Sharad (Autumn)';
-        if (m >= 11 && m <= 12) return 'Hemant (Pre-winter)';
-        return 'Shishir (Winter)';
-      })(),
-      ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
-      ...(() => {
-        // Calculate accurate sunrise/sunset with timezone
-        const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude, inputs.timezone);
-        const sunriseDate = new Date((sunTimes.sunriseJD - 2440587.5) * 86400000);
-        const sunsetDate = new Date((sunTimes.sunsetJD - 2440587.5) * 86400000);
+    enhancedDetails: (() => {
+      // Calculate accurate sunrise/sunset with timezone
+      const sunTimes = calculateSunriseSunset(jdUt, inputs.latitude, inputs.longitude, inputs.timezone);
+      const sunriseDate = new Date((sunTimes.sunriseJD - 2440587.5) * 86400000);
+      const sunsetDate = new Date((sunTimes.sunsetJD - 2440587.5) * 86400000);
 
-        // Calculate day/night duration
-        const dayDurationMs = sunsetDate - sunriseDate;
-        const nightDurationMs = 24 * 60 * 60 * 1000 - dayDurationMs;
+      const dayDurationMs = sunsetDate - sunriseDate;
+      const nightDurationMs = 24 * 60 * 60 * 1000 - dayDurationMs;
 
-        const formatDuration = (ms) => {
-          const hours = Math.floor(ms / (1000 * 60 * 60));
-          const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-          return `${hours}h ${minutes}m`;
-        };
+      const formatDuration = (ms) => {
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${minutes}m`;
+      };
 
-        return {
-          sunrise: sunTimes.sunrise,
-          sunset: sunTimes.sunset,
-          dayDuration: formatDuration(dayDurationMs),
-          nightDuration: formatDuration(nightDurationMs),
-        };
-      })(),
-      moonrise: '07:30 PM',
-      moonset: '06:30 AM',
-      lagnaAtSunrise: RASHIS[ascSignIndex],
-      suryaNakshatraAtSunrise: sun ? sun.nakshatra.name : null,
-      chandraNakshatraAtSunrise: moon ? moon.nakshatra.name : null,
-      chandraPadaAtSunrise: moon ? moon.nakshatra.pada : null,
-      mangalDosha: calculateMangalDosha(enrichedPlanets, ascDegree),
-      yoni: moon ? getYoniFromNakshatra(moon.nakshatra.index) : null,
-      gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
-      nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
-      varna: moon ? getVarnaFromSign(moon.sign) : null,
-      nakshatraPaya: moon ? getNakshatraPaya(moon.nakshatra.index, moon.nakshatra.pada) : null,
-      rashiSwami: moon ? getRasiLord(moon.sign) : null,
-      nakshatraSwami: moon ? moon.nakshatra.lord : null,
-      ishtaKaal: calculateIshtaKaal(inputs.birthTime, sunTimes.sunrise),
-      remainingDasha: vimshottariDasha.current ? `${vimshottariDasha.current.planet} Dasha remaining: ${Math.max(0, (new Date(vimshottariDasha.current.endDate).getTime() - new Date(utcIsoString).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : "N/A",
-      // Namakshar (first letter of name based on Nakshatra Pada)
-      namakshar: moon ? getNamaksharFromNakshatra(moon.nakshatra.name, moon.nakshatra.pada) : null,
-    },
+      const tithiData = moon && sun ? calculateTithi(sun.longitude, moon.longitude) : { name: "N/A", number: 0 };
+
+      return {
+        vikramSamvat: calculateVikramSamvat(inputs.year, inputs.month),
+        shalivahanaShake: inputs.year - 78,
+        tithi: tithiData,
+        paksha: moon && sun ? calculatePaksha(tithiData.number) : "N/A",
+        masa: moon && sun ? calculateMasa(moon.longitude, sun.longitude) : "N/A",
+        yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : "N/A",
+        karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : "N/A",
+        dayOfWeek: new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' }),
+        chandraRashi: moon ? moon.sign : "N/A",
+        suryaRashi: sun ? sun.sign : "N/A",
+        brihaspatiRashi: enrichedPlanets.find(p => p.name === 'Jupiter')?.sign || 'N/A',
+        ritu: (() => {
+          const m = inputs.month;
+          if (m >= 3 && m <= 4) return 'Vasant (Spring)';
+          if (m >= 5 && m <= 6) return 'Grishma (Summer)';
+          if (m >= 7 && m <= 8) return 'Varsha (Monsoon)';
+          if (m >= 9 && m <= 10) return 'Sharad (Autumn)';
+          if (m >= 11 && m <= 12) return 'Hemant (Pre-winter)';
+          return 'Shishir (Winter)';
+        })(),
+        ayana: (inputs.month >= 1 && inputs.month <= 6) ? 'Uttarayana (Northern)' : 'Dakshinayana (Southern)',
+        sunrise: sunTimes.sunrise,
+        sunset: sunTimes.sunset,
+        dayDuration: formatDuration(dayDurationMs),
+        nightDuration: formatDuration(nightDurationMs),
+        moonrise: '07:30 PM',
+        moonset: '06:30 AM',
+        lagnaAtSunrise: RASHIS[ascSignIndex],
+        suryaNakshatraAtSunrise: sun ? sun.nakshatra.name : null,
+        chandraNakshatraAtSunrise: moon ? moon.nakshatra.name : null,
+        chandraPadaAtSunrise: moon ? moon.nakshatra.pada : null,
+        mangalDosha: calculateMangalDosha(enrichedPlanets, ascDegree),
+        yoni: moon ? getYoniFromNakshatra(moon.nakshatra.index) : null,
+        gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
+        nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
+        varna: moon ? getVarnaFromSign(moon.sign) : null,
+        nakshatraPaya: moon ? getNakshatraPaya(moon.nakshatra.index, moon.nakshatra.pada) : null,
+        rashiSwami: moon ? getRasiLord(moon.sign) : null,
+        nakshatraSwami: moon ? moon.nakshatra.lord : null,
+        ishtaKaal: calculateIshtaKaal(inputs.birthTime, sunTimes.sunrise),
+        remainingDasha: vimshottariDasha.current ? `${vimshottariDasha.current.planet} Dasha remaining: ${Math.max(0, (new Date(vimshottariDasha.current.endDate).getTime() - new Date(utcIsoString).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : "N/A",
+        namakshar: moon ? getNamaksharFromNakshatra(moon.nakshatra.name, moon.nakshatra.pada) : null,
+      };
+    })(),
     // PHALLIT (Predictions) - Real Dynamic Analysis
     phallit: (() => {
       try {
