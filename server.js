@@ -1938,7 +1938,7 @@ const server = http.createServer(async (req, res) => {
       const t1Idx = (diff1 % 9) + 1; // 1-9
       const t2Idx = (diff2 % 9) + 1; // 1-9
 
-      const taraNames = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
+      const taraNames = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhak", "Nidhan", "Mitra", "Ati-Mitra"];
       const tara1 = taraNames[t1Idx];
       const tara2 = taraNames[t2Idx];
 
