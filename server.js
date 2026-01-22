@@ -647,18 +647,18 @@ function getVarnaFromSign(sign) {
 function getVashya(moonSign) {
   // Vashya types according to AstroSage standard
   const vashyas = {
-    "Aries": "Chatu",      // Quadruped
-    "Taurus": "Vanchar",   // Forest dweller (NOT Chatu)
-    "Gemini": "Manav",     // Human
-    "Cancer": "Jalchar",   // Water creature
-    "Leo": "Chatu",        // Quadruped
-    "Virgo": "Manav",      // Human
-    "Libra": "Manav",      // Human
-    "Scorpio": "Keeta",    // Insect
-    "Sagittarius": "Manav", // Human
-    "Capricorn": "Vanchar", // Forest dweller
-    "Aquarius": "Manav",   // Human
-    "Pisces": "Jalchar"    // Water creature
+    "Aries": "Chatu",
+    "Taurus": "Chatu",
+    "Gemini": "Manav",
+    "Cancer": "Jalchar",
+    "Leo": "Vanchar",
+    "Virgo": "Manav",
+    "Libra": "Manav",
+    "Scorpio": "Keeta",
+    "Sagittarius": "Manav",
+    "Capricorn": "Jalchar",
+    "Aquarius": "Manav",
+    "Pisces": "Jalchar"
   };
   return vashyas[moonSign] || "Unknown";
 }
@@ -673,26 +673,22 @@ function getRasiLord(moonSign) {
   return lords[moonSign] || "Unknown";
 }
 
-function getNakshatraPaya(nakIndex) {
-  // Paya: Gold, Silver, Copper, Iron (cycles through nakshatras)
-  const payas = ["Gold", "Silver", "Copper", "Iron"];
-  return payas[(nakIndex - 1) % 4];
-}
-
-function calculateIshtaKaal(sunriseLong, ascDegree) {
-  // Simplified Ishta Kaal calculation (auspicious time)
-  // This is a complex calculation, using simplified version
-  const diff = Math.abs(normalizeDegree(sunriseLong - ascDegree));
-  const hours = Math.floor(diff / 15); // Rough approximation
-  const minutes = Math.floor((diff % 15) * 4);
-  return `${hours}h ${minutes}m after sunrise`;
-}
+// Simplified Ishta Kaal calculation removed - using the robust version below
 
 // Get Nakshatra Paya (foot/step)
-function getNakshatraPaya(nakIndex, pada) {
-  const payaNames = ["", "Gold", "Silver", "Copper", "Iron"];
-  const payaIndex = ((nakIndex - 1) * 4 + pada) % 4;
-  return payaNames[payaIndex === 0 ? 4 : payaIndex];
+// Get Nakshatra Paya (foot/step) based on relationship with Sun sign
+function getNakshatraPaya(moonSignIndex, sunSignIndex) {
+  // Distance from Sun sign (1-indexed)
+  const diff = (moonSignIndex - sunSignIndex + 12) % 12 + 1;
+  // 1, 6, 11 from Sun = Gold
+  // 2, 5, 9 from Sun = Silver
+  // 3, 7, 10 from Sun = Copper
+  // 4, 8, 12 from Sun = Iron
+  if ([1, 6, 11].includes(diff)) return "Gold";
+  if ([2, 5, 9].includes(diff)) return "Silver";
+  if ([3, 7, 10].includes(diff)) return "Copper";
+  if ([4, 8, 12].includes(diff)) return "Iron";
+  return "Iron";
 }
 
 // Calculate Rahu Kaal (inauspicious time)
@@ -1663,10 +1659,10 @@ function computeKundali(payload) {
         gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
         nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
         varna: moon ? getVarnaFromSign(moon.sign) : null,
-        nakshatraPaya: moon ? getNakshatraPaya(moon.nakshatra.index, moon.nakshatra.pada) : null,
+        nakshatraPaya: moon && sun ? getNakshatraPaya(moon.signIndex, sun.signIndex) : null,
         rashiSwami: moon ? getRasiLord(moon.sign) : null,
         nakshatraSwami: moon ? moon.nakshatra.lord : null,
-        ishtaKaal: calculateIshtaKaal(inputs.birthTime, sunTimes.sunrise),
+        ishtaKaal: calculateIshtaKaal(localTimeString, sunTimes.sunrise),
         remainingDasha: vimshottariDasha.current ? `${vimshottariDasha.current.planet} Dasha remaining: ${Math.max(0, (new Date(vimshottariDasha.current.endDate).getTime() - new Date(utcIsoString).getTime()) / (1000 * 60 * 60 * 24 * 365.25)).toFixed(1)} years` : "N/A",
         namakshar: moon ? getNamaksharFromNakshatra(moon.nakshatra.name, moon.nakshatra.pada) : null,
       };
@@ -1925,18 +1921,15 @@ const server = http.createServer(async (req, res) => {
 
       const vashya1 = getVashya(moon1.sign);
       const vashya2 = getVashya(moon2.sign);
-      let vashyaScore = 0;
-      if (vashya1 === vashya2) {
-        vashyaScore = 2;
-      } else if ((vashya1 === "Manav" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Manav")) {
-        vashyaScore = 0.5;
-      } else if ((vashya1 === "Chatu" && vashya2 === "Manav") || (vashya1 === "Manav" && vashya2 === "Chatu")) {
-        vashyaScore = 1;
-      } else if ((vashya1 === "Chatu" && vashya2 === "Jalchar") || (vashya1 === "Jalchar" && vashya2 === "Chatu")) {
-        vashyaScore = 0.5;
-      } else {
-        vashyaScore = 0;
-      }
+
+      const vashyaMatrix = {
+        "Chatu": { "Chatu": 2, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 1 },
+        "Manav": { "Chatu": 1, "Manav": 2, "Jalchar": 1.5, "Vanchar": 0, "Keeta": 1 },
+        "Jalchar": { "Chatu": 1, "Manav": 1.5, "Jalchar": 2, "Vanchar": 1, "Keeta": 1 },
+        "Vanchar": { "Chatu": 0, "Manav": 0, "Jalchar": 1, "Vanchar": 2, "Keeta": 0 },
+        "Keeta": { "Chatu": 1, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 2 }
+      };
+      const vashyaScore = (vashyaMatrix[vashya1] && vashyaMatrix[vashya1][vashya2] !== undefined) ? vashyaMatrix[vashya1][vashya2] : 0;
 
       // Tara calculation: count from boy's nakshatra to girl's nakshatra
       const diff1 = (moon2.nakshatra.index - moon1.nakshatra.index + 27) % 27;
@@ -2006,15 +1999,21 @@ const server = http.createServer(async (req, res) => {
       const signDistance = ((sign2Index - sign1Index + 12) % 12) + 1;
 
       let bhakootScore = 7;
-
-      // Bad Bhakoot combinations: 2/12, 5/9, 6/8
+      // Bad combinations: 2/12, 5/9, 6/8
       if ([2, 12, 5, 9, 6, 8].includes(signDistance)) {
         bhakootScore = 0;
-
-        // Exception: If Rashi lords are same or friends, Bhakoot Dosha is cancelled (simplified to same lord for now)
-        if (lord1 === lord2) {
-          bhakootScore = 7;
-        }
+        // CANCELLATION RULES:
+        // 1. Same Rashi Lord (e.g. Aries/Scorpio, Taurus/Libra)
+        if (lord1 === lord2) bhakootScore = 7;
+        // 2. Mutual friends (Sun/Moon, Jupiter/Mars, etc.)
+        const mutualFriends = [
+          ["Sun", "Moon"], ["Sun", "Mars"], ["Sun", "Jupiter"],
+          ["Moon", "Mercury"], ["Mars", "Jupiter"], ["Venus", "Saturn"], ["Venus", "Mercury"]
+        ];
+        const areFriends = mutualFriends.some(pair =>
+          (pair.includes(lord1) && pair.includes(lord2))
+        );
+        if (areFriends) bhakootScore = 7;
       }
 
       const nadi1 = getNadiFromNakshatra(moon1.nakshatra.index);
