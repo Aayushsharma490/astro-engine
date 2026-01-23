@@ -457,23 +457,11 @@ function formatDateParts(date) {
   };
 }
 
-function getNadiFromNakshatra(nakIndex) {
-  if (!nakIndex) return "Unknown";
-  // Groups: 1, 6, 7, 12, 13, 18, 19, 24, 25 -> Adi
-  const adi = [1, 6, 7, 12, 13, 18, 19, 24, 25];
-  const madhya = [2, 5, 8, 11, 14, 17, 20, 23, 26];
-  const antya = [3, 4, 9, 10, 15, 16, 21, 22, 27];
-  if (adi.includes(nakIndex)) return "Adi";
-  if (madhya.includes(nakIndex)) return "Madhya";
-  if (antya.includes(nakIndex)) return "Antya";
-  return "Unknown";
-}
+// Duplicate function removed - using the one below
 
-function getTara(nak1, nak2) {
-  const diff = (nak2 - nak1 + 27) % 9 || 9;
-  const taras = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyak", "Sadhak", "Vadha", "Mitra", "Ati-Mitra"];
-  return taras[diff];
-}
+
+// Duplicate function removed - using the robust one below at line 648
+
 
 // ===== PANCHANG CALCULATION FUNCTIONS =====
 
@@ -699,21 +687,20 @@ function getRasiLord(moonSign) {
 
 // Simplified Ishta Kaal calculation removed - using the robust version below
 
-// Get Nakshatra Paya (foot/step) - Pada-based calculation
-function getNakshatraPaya(moonSignIndex, sunSignIndex, moonNakshatraIndex, moonPada) {
-  if (!moonNakshatraIndex) return "Unknown";
+// Get Nakshatra Paya (foot/step) - House-based calculation (Standard for Kundali)
+// Gold (Swarna): Moon in 1, 6, 11
+// Silver (Rajat): Moon in 2, 5, 9
+// Copper (Tamra): Moon in 3, 7, 10
+// Iron (Loha): Moon in 4, 8, 12
+function getNakshatraPaya(moonHouse) {
+  if (!moonHouse) return "Unknown";
 
-  const swarna = [1, 9, 13, 15, 24, 26];
-  const rajat = [2, 5, 8, 17, 18, 21, 25];
-  const tamra = [7, 10, 11, 12, 16, 19, 23, 27];
-  const loha = [3, 4, 6, 14, 20, 22];
+  if ([1, 6, 11].includes(moonHouse)) return "Gold";
+  if ([2, 5, 9].includes(moonHouse)) return "Silver";
+  if ([3, 7, 10].includes(moonHouse)) return "Copper";
+  if ([4, 8, 12].includes(moonHouse)) return "Iron";
 
-  if (swarna.includes(moonNakshatraIndex)) return "Gold";
-  if (rajat.includes(moonNakshatraIndex)) return "Silver";
-  if (tamra.includes(moonNakshatraIndex)) return "Copper";
-  if (loha.includes(moonNakshatraIndex)) return "Iron";
-
-  return "Iron";
+  return "Iron"; // Fallback
 }
 
 // Calculate Rahu Kaal (inauspicious time)
@@ -1665,11 +1652,53 @@ function computeKundali(payload) {
         yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : "N/A",
         karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : "N/A",
         dayOfWeek: (() => {
-          // Calculate day of week from Julian Day for accuracy
-          // JD 0 = Monday, but (JD + 1.5) % 7 gives 0=Sunday, 1=Monday...
-          const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-          const dayIndex = Math.floor(jdUt + 0.5) % 7;
-          return days[dayIndex];
+          // Vedic Day Calculation (Sunrise to Sunrise)
+          // parsing sunrise time "HH:MM AM/PM" or "HH:MM"
+          try {
+            // Default to standard day first
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const standardDayIndex = Math.floor(jdUt + 0.5) % 7;
+            let vedicDayIndex = standardDayIndex;
+
+            // Check if birth is before sunrise
+            if (sunTimes.sunrise) {
+              // Parse sunrise
+              let sH, sM;
+              const srStr = sunTimes.sunrise; // e.g. "06:24 AM"
+              if (srStr.includes('AM') || srStr.includes('PM')) {
+                const [time, ampm] = srStr.split(' ');
+                const [h, m] = time.split(':').map(Number);
+                sH = h;
+                sM = m;
+                if (ampm === 'PM' && sH < 12) sH += 12;
+                if (ampm === 'AM' && sH === 12) sH = 0;
+              } else {
+                const [h, m] = srStr.split(':').map(Number);
+                sH = h;
+                sM = m;
+              }
+
+              // Birth local time
+              const bH = inputs.hour;
+              const bM = inputs.minute;
+
+              // Compare minutes from midnight
+              const birthMins = bH * 60 + bM;
+              const sunMins = sH * 60 + sM;
+
+              if (birthMins < sunMins) {
+                // Birth is before sunrise -> previous day
+                vedicDayIndex = (standardDayIndex - 1 + 7) % 7;
+                console.log(`[astro-engine] Birth (${bH}:${bM}) is before Sunrise (${sH}:${sM}). Using previous day.`);
+              }
+            }
+
+            return days[vedicDayIndex];
+          } catch (e) {
+            console.error("[astro-engine] Error calculating Vedic day:", e);
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            return days[Math.floor(jdUt + 0.5) % 7];
+          }
         })(),
         chandraRashi: moon ? moon.sign : "N/A",
         suryaRashi: sun ? sun.sign : "N/A",
@@ -1703,7 +1732,7 @@ function computeKundali(payload) {
         gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
         nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
         varna: moon ? getVarnaFromSign(moon.sign) : null,
-        nakshatraPaya: moon && sun ? getNakshatraPaya(moon.signIndex, sun.signIndex, moon.nakshatra.index, moon.nakshatra.pada) : null,
+        nakshatraPaya: moon ? getNakshatraPaya(moon.house) : null,
         rashiSwami: moon ? getRasiLord(moon.sign) : null,
         nakshatraSwami: moon ? moon.nakshatra.lord : null,
         ishtaKaal: calculateIshtaKaal(localTimeString, sunTimes.sunrise),
