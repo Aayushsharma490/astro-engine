@@ -700,19 +700,11 @@ function getRasiLord(moonSign) {
 // Get Nakshatra Paya (foot/step) - Pada-based calculation
 function getNakshatraPaya(moonSignIndex, sunSignIndex, moonNakshatraIndex, moonPada) {
   // Nakshatra Paya is based on the pada (quarter) of the nakshatra
-  // Each nakshatra has 4 padas cycling through: Gold, Silver, Copper, Iron
-  // Pattern repeats every 4 padas
+  // Simple pattern: Pada 1 = Gold, Pada 2 = Silver, Pada 3 = Copper, Pada 4 = Iron
+  // This pattern repeats for every nakshatra
 
-  // Standard Paya pattern based on nakshatra pada:
-  // Pada 1 = Gold, Pada 2 = Silver, Pada 3 = Copper, Pada 4 = Iron
-  // But this varies by nakshatra group
-
-  // Using the traditional method: Paya depends on nakshatra number and pada
-  // Formula: ((nakshatra - 1) * 4 + pada - 1) % 4
-  // Result: 0=Gold, 1=Silver, 2=Copper, 3=Iron
-
-  if (!moonNakshatraIndex || !moonPada) {
-    // Fallback to rashi-based if nakshatra data unavailable
+  if (!moonPada || moonPada < 1 || moonPada > 4) {
+    // Fallback to rashi-based if pada data unavailable
     const diff = (moonSignIndex - sunSignIndex + 12) % 12 + 1;
     if ([1, 6, 9].includes(diff)) return "Gold";
     if ([2, 5, 11].includes(diff)) return "Silver";
@@ -721,10 +713,9 @@ function getNakshatraPaya(moonSignIndex, sunSignIndex, moonNakshatraIndex, moonP
     return "Iron";
   }
 
-  // Nakshatra-pada based calculation
-  const payaIndex = ((moonNakshatraIndex - 1) * 4 + moonPada - 1) % 4;
+  // Pada-based calculation (simple and direct)
   const payas = ["Gold", "Silver", "Copper", "Iron"];
-  return payas[payaIndex];
+  return payas[moonPada - 1];
 }
 
 // Calculate Rahu Kaal (inauspicious time)
@@ -1675,7 +1666,13 @@ function computeKundali(payload) {
         masa: moon && sun ? calculateMasa(moon.longitude, sun.longitude) : "N/A",
         yoga: moon && sun ? calculateYoga(sun.longitude, moon.longitude) : "N/A",
         karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : "N/A",
-        dayOfWeek: new Date(inputs.year, inputs.month - 1, inputs.day).toLocaleDateString('en-US', { weekday: 'long' }),
+        dayOfWeek: (() => {
+          // Calculate day of week from Julian Day for accuracy
+          const jdForDay = Math.floor(jdUt + 0.5);
+          const dayIndex = (jdForDay + 1) % 7; // JD 0 was Monday
+          const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+          return days[dayIndex];
+        })(),
         chandraRashi: moon ? moon.sign : "N/A",
         suryaRashi: sun ? sun.sign : "N/A",
         brihaspatiRashi: enrichedPlanets.find(p => p.name === 'Jupiter')?.sign || 'N/A',
