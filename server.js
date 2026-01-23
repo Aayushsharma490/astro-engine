@@ -599,9 +599,10 @@ function calculateMangalDosha(planets, ascDegree) {
 
 function getYoniFromNakshatra(nakIndex) {
   if (!nakIndex) return "Unknown";
-  // AstroSage-compatible Sanskrit Yoni names
+  // AstroSage/Standard Compatible Yoni names (Mesha instead of Chaga)
+  // 1:Ashwa, 2:Gaja, 3:Mesha, 4:Sarpa, 5:Sarpa, 6:Shwan, 7:Marjar, 8:Mesha, ...
   const yonis = [
-    "Ashwa", "Gaja", "Chaga", "Sarpa", "Sarpa", "Shwan", "Marjar", "Chaga", "Marjar",
+    "Ashwa", "Gaja", "Mesha", "Sarpa", "Sarpa", "Shwan", "Marjar", "Mesha", "Marjar",
     "Mushak", "Mushak", "Gau", "Mahish", "Vyaghra", "Mahish", "Vyaghra", "Mriga", "Mriga",
     "Shwan", "Vanar", "Nakul", "Vanar", "Simha", "Ashwa", "Simha", "Gau", "Gaja"
   ];
@@ -2049,20 +2050,20 @@ const server = http.createServer(async (req, res) => {
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
       const yoniMatrix = {
-        "Ashwa": { "Ashwa": 4, "Gaja": 2, "Chaga": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
-        "Gaja": { "Ashwa": 2, "Gaja": 4, "Chaga": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
-        "Chaga": { "Ashwa": 2, "Gaja": 3, "Chaga": 4, "Sarpa": 2, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 0, "Simha": 1, "Nakul": 2 },
-        "Sarpa": { "Ashwa": 1, "Gaja": 3, "Chaga": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 0 },
-        "Shwan": { "Ashwa": 1, "Gaja": 2, "Chaga": 1, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Marjar": { "Ashwa": 2, "Gaja": 2, "Chaga": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mushak": { "Ashwa": 1, "Gaja": 2, "Chaga": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 3, "Mahish": 3, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
-        "Gau": { "Ashwa": 1, "Gaja": 2, "Chaga": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Mahish": { "Ashwa": 0, "Gaja": 2, "Chaga": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Chaga": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
-        "Mriga": { "Ashwa": 1, "Gaja": 2, "Chaga": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 1, "Nakul": 2 },
-        "Vanar": { "Ashwa": 3, "Gaja": 3, "Chaga": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
-        "Simha": { "Ashwa": 1, "Gaja": 0, "Chaga": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 1, "Vanar": 3, "Simha": 4, "Nakul": 2 },
-        "Nakul": { "Ashwa": 2, "Gaja": 2, "Chaga": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
+        "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
+        "Gaja": { "Ashwa": 2, "Gaja": 4, "Mesha": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
+        "Mesha": { "Ashwa": 2, "Gaja": 3, "Mesha": 4, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 1, "Nakul": 2 },
+        "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 0 },
+        "Shwan": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 4, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 0, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Marjar": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 2, "Marjar": 4, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 2, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Mushak": { "Ashwa": 1, "Gaja": 2, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 0, "Mushak": 4, "Gau": 3, "Mahish": 3, "Vyaghra": 2, "Mriga": 2, "Vanar": 1, "Simha": 1, "Nakul": 0 },
+        "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
+        "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 3, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
+        "Simha": { "Ashwa": 1, "Gaja": 0, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 1, "Vanar": 3, "Simha": 4, "Nakul": 2 },
+        "Nakul": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
       };
       let yoniScore = (yoniMatrix[yoni1] && yoniMatrix[yoni1][yoni2] !== undefined) ? yoniMatrix[yoni1][yoni2] : 2;
 
