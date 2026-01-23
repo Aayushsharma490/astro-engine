@@ -1,3 +1,4 @@
+
 "use strict";
 
 /**
@@ -1975,7 +1976,7 @@ const server = http.createServer(async (req, res) => {
         "Manav": { "Chatu": 1, "Manav": 2, "Jalchar": 0.5, "Vanchar": 0, "Keeta": 0 },
         "Jalchar": { "Chatu": 1, "Manav": 0.5, "Jalchar": 2, "Vanchar": 1, "Keeta": 1 },
         "Vanchar": { "Chatu": 0, "Manav": 0, "Jalchar": 1, "Vanchar": 2, "Keeta": 0 },
-        "Keeta": { "Chatu": 1, "Manav": 0, "Jalchar": 1, "Vanchar": 0, "Keeta": 2 }
+        "Keeta": { "Chatu": 1, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 2 }
       };
       const vashyaScore = (vashyaMatrix[vashya1] && vashyaMatrix[vashya1][vashya2] !== undefined) ? vashyaMatrix[vashya1][vashya2] : 0;
 
@@ -1991,8 +1992,9 @@ const server = http.createServer(async (req, res) => {
       const t2Idx = ((count2 - 1) % 9) + 1;
 
       const taraNames = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhak", "Nidhan", "Mitra", "Ati-Mitra"];
-      const tara1 = taraNames[t1Idx];
-      const tara2 = taraNames[t2Idx];
+      // Boy's tara is from girl's perspective (count2), Girl's tara is from boy's perspective (count1)
+      const tara1 = taraNames[t2Idx]; // Boy's tara
+      const tara2 = taraNames[t1Idx]; // Girl's tara
 
       const goodTaraIndices = [2, 4, 6, 8, 9]; // Sampat, Kshema, Sadhak, Mitra, Ati-Mitra
       let taraScore = 0;
@@ -2017,9 +2019,9 @@ const server = http.createServer(async (req, res) => {
         "Gau": { "Ashwa": 1, "Gaja": 2, "Chaga": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Mahish": { "Ashwa": 0, "Gaja": 2, "Chaga": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Chaga": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
-        "Mriga": { "Ashwa": 1, "Gaja": 2, "Chaga": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 2, "Nakul": 2 },
+        "Mriga": { "Ashwa": 1, "Gaja": 2, "Chaga": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Vanar": { "Ashwa": 3, "Gaja": 3, "Chaga": 0, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
-        "Simha": { "Ashwa": 1, "Gaja": 0, "Chaga": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 2, "Vanar": 3, "Simha": 4, "Nakul": 2 },
+        "Simha": { "Ashwa": 1, "Gaja": 0, "Chaga": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 1, "Vanar": 3, "Simha": 4, "Nakul": 2 },
         "Nakul": { "Ashwa": 2, "Gaja": 2, "Chaga": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
       };
       let yoniScore = (yoniMatrix[yoni1] && yoniMatrix[yoni1][yoni2] !== undefined) ? yoniMatrix[yoni1][yoni2] : 2;
