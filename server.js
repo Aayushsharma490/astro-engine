@@ -687,20 +687,32 @@ function getRasiLord(moonSign) {
 
 // Simplified Ishta Kaal calculation removed - using the robust version below
 
-// Get Nakshatra Paya (foot/step) - House-based calculation (Standard for Kundali)
-// Gold (Swarna): Moon in 1, 6, 11
-// Silver (Rajat): Moon in 2, 5, 9
-// Copper (Tamra): Moon in 3, 7, 10
-// Iron (Loha): Moon in 4, 8, 12
-function getNakshatraPaya(moonHouse) {
-  if (!moonHouse) return "Unknown";
+// Get Nakshatra Paya (Nakshatra Based - AstroSage Compatible)
+// Gold: Ashwini, Bharani, Revati (Some texts: + Mull? No, let's stick to standard)
+// Silver: Ardra, Punarvasu, Pushya, Ashlesha, Magha, P.Phalguni, U.Phalguni, Hasta, Chitra, Swati, Vishakha, Anuradha
+// Copper: Jyeshtha, Mula, P.Ashadha, U.Ashadha, Shravana, Dhanishta, Shatabhisha, P.Bhadrapada, U.Bhadrapada
+// Iron: Krittika, Rohini, Mrigashira
+function getNakshatraPaya(nakIndex) {
+  if (!nakIndex) return "Unknown";
 
-  if ([1, 6, 11].includes(moonHouse)) return "Gold";
-  if ([2, 5, 9].includes(moonHouse)) return "Silver";
-  if ([3, 7, 10].includes(moonHouse)) return "Copper";
-  if ([4, 8, 12].includes(moonHouse)) return "Iron";
+  // Gold Paya (Swarna)
+  const gold = [1, 2, 27]; // Ashwini, Bharani, Revati
 
-  return "Iron"; // Fallback
+  // Silver Paya (Rajat)
+  const silver = [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]; // Ardra to Anuradha
+
+  // Copper Paya (Tamra)
+  const copper = [18, 19, 20, 21, 22, 23, 24, 25, 26]; // Jyeshtha to U.Bhadrapada
+
+  // Iron Paya (Loha)
+  const iron = [3, 4, 5]; // Krittika, Rohini, Mrigashira
+
+  if (gold.includes(nakIndex)) return "Gold";
+  if (silver.includes(nakIndex)) return "Silver";
+  if (copper.includes(nakIndex)) return "Copper";
+  if (iron.includes(nakIndex)) return "Iron";
+
+  return "Silver"; // Fallback to most common if unmatched
 }
 
 // Calculate Rahu Kaal (inauspicious time)
@@ -1653,11 +1665,11 @@ function computeKundali(payload) {
         karana: moon && sun ? calculateKarana(sun.longitude, moon.longitude) : "N/A",
         dayOfWeek: (() => {
           // Vedic Day Calculation (Sunrise to Sunrise)
-          // parsing sunrise time "HH:MM AM/PM" or "HH:MM"
           try {
-            // Default to standard day first
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            const standardDayIndex = Math.floor(jdUt + 0.5) % 7;
+
+            // Standard JD to Day formula: (JD + 1.5) % 7 -> 0=Sunday, 1=Monday...
+            const standardDayIndex = Math.floor(jdUt + 1.5) % 7;
             let vedicDayIndex = standardDayIndex;
 
             // Check if birth is before sunrise
@@ -1697,7 +1709,7 @@ function computeKundali(payload) {
           } catch (e) {
             console.error("[astro-engine] Error calculating Vedic day:", e);
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            return days[Math.floor(jdUt + 0.5) % 7];
+            return days[Math.floor(jdUt + 1.5) % 7];
           }
         })(),
         chandraRashi: moon ? moon.sign : "N/A",
@@ -1732,7 +1744,7 @@ function computeKundali(payload) {
         gana: moon ? getGanaFromNakshatra(moon.nakshatra.index) : null,
         nadi: moon ? getNadiFromNakshatra(moon.nakshatra.index) : null,
         varna: moon ? getVarnaFromSign(moon.sign) : null,
-        nakshatraPaya: moon ? getNakshatraPaya(moon.house) : null,
+        nakshatraPaya: moon ? getNakshatraPaya(moon.nakshatra.index) : null,
         rashiSwami: moon ? getRasiLord(moon.sign) : null,
         nakshatraSwami: moon ? moon.nakshatra.lord : null,
         ishtaKaal: calculateIshtaKaal(localTimeString, sunTimes.sunrise),
@@ -2143,7 +2155,7 @@ const server = http.createServer(async (req, res) => {
           ascendant: kundali1.ascendant.sign,
           moonSign: moon1.sign,
           ishtaKaal: kundali1.enhancedDetails.ishtaKaal,
-          nakshatraPaya: kundali1.enhancedDetails.nakshatraPaya,
+          nakshatraPaya: getNakshatraPaya(moon1.nakshatra.index),
           chart: generateSimpleChart(kundali1.ascendant.sign)
         },
         girlDetails: {
@@ -2158,7 +2170,7 @@ const server = http.createServer(async (req, res) => {
           ascendant: kundali2.ascendant.sign,
           moonSign: moon2.sign,
           ishtaKaal: kundali2.enhancedDetails.ishtaKaal,
-          nakshatraPaya: kundali2.enhancedDetails.nakshatraPaya,
+          nakshatraPaya: getNakshatraPaya(moon2.nakshatra.index),
           chart: generateSimpleChart(kundali2.ascendant.sign)
         },
         recommendation: totalScore >= 28
