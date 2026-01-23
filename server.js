@@ -278,7 +278,7 @@ function calculateNakshatra(degree) {
   // 4 padas per nakshatra → 3°20' each = 3.333333... degrees
   // Add small epsilon to handle floating point precision at boundaries
   const padaSpan = span / 4;
-  const pada = Math.ceil((withinNak + 0.0001) / padaSpan);
+  const pada = Math.ceil((withinNak + 0.0001) / padaSpan) || 1;
   return {
     name: NAKSHATRAS[index],
     lord: NAKSHATRA_LORDS[index],
