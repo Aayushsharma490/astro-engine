@@ -2050,7 +2050,7 @@ const server = http.createServer(async (req, res) => {
       const yoni1 = getYoniFromNakshatra(moon1.nakshatra.index);
       const yoni2 = getYoniFromNakshatra(moon2.nakshatra.index);
       const yoniMatrix = {
-        "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 1, "Vanar": 3, "Simha": 1, "Nakul": 2 },
+        "Ashwa": { "Ashwa": 4, "Gaja": 2, "Mesha": 2, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 1, "Gau": 1, "Mahish": 0, "Vyaghra": 1, "Mriga": 3, "Vanar": 3, "Simha": 1, "Nakul": 2 },
         "Gaja": { "Ashwa": 2, "Gaja": 4, "Mesha": 3, "Sarpa": 3, "Shwan": 2, "Marjar": 2, "Mushak": 2, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 0, "Nakul": 2 },
         "Mesha": { "Ashwa": 2, "Gaja": 3, "Mesha": 4, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 3, "Mahish": 3, "Vyaghra": 1, "Mriga": 2, "Vanar": 3, "Simha": 1, "Nakul": 2 },
         "Sarpa": { "Ashwa": 1, "Gaja": 3, "Mesha": 2, "Sarpa": 4, "Shwan": 2, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 1, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 0 },
@@ -2060,7 +2060,7 @@ const server = http.createServer(async (req, res) => {
         "Gau": { "Ashwa": 1, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 4, "Mahish": 3, "Vyaghra": 0, "Mriga": 1, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Mahish": { "Ashwa": 0, "Gaja": 2, "Mesha": 3, "Sarpa": 1, "Shwan": 2, "Marjar": 2, "Mushak": 3, "Gau": 3, "Mahish": 4, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Vyaghra": { "Ashwa": 1, "Gaja": 1, "Mesha": 1, "Sarpa": 1, "Shwan": 1, "Marjar": 2, "Mushak": 2, "Gau": 0, "Mahish": 1, "Vyaghra": 4, "Mriga": 1, "Vanar": 1, "Simha": 2, "Nakul": 1 },
-        "Mriga": { "Ashwa": 1, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 1, "Nakul": 2 },
+        "Mriga": { "Ashwa": 3, "Gaja": 2, "Mesha": 2, "Sarpa": 2, "Shwan": 0, "Marjar": 1, "Mushak": 2, "Gau": 1, "Mahish": 2, "Vyaghra": 1, "Mriga": 4, "Vanar": 2, "Simha": 1, "Nakul": 2 },
         "Vanar": { "Ashwa": 3, "Gaja": 3, "Mesha": 3, "Sarpa": 2, "Shwan": 2, "Marjar": 2, "Mushak": 1, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 4, "Simha": 3, "Nakul": 2 },
         "Simha": { "Ashwa": 1, "Gaja": 0, "Mesha": 1, "Sarpa": 2, "Shwan": 1, "Marjar": 1, "Mushak": 1, "Gau": 1, "Mahish": 1, "Vyaghra": 2, "Mriga": 1, "Vanar": 3, "Simha": 4, "Nakul": 2 },
         "Nakul": { "Ashwa": 2, "Gaja": 2, "Mesha": 2, "Sarpa": 0, "Shwan": 2, "Marjar": 2, "Mushak": 0, "Gau": 2, "Mahish": 2, "Vyaghra": 1, "Mriga": 2, "Vanar": 2, "Simha": 2, "Nakul": 4 }
@@ -2083,7 +2083,7 @@ const server = http.createServer(async (req, res) => {
       const gana1 = getGanaFromNakshatra(moon1.nakshatra.index);
       const gana2 = getGanaFromNakshatra(moon2.nakshatra.index);
       const ganaScoring = {
-        "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 1 },
+        "Devta": { "Devta": 6, "Manushya": 6, "Rakshasa": 0 }, // Devta-Rakshasa 0 (Match rare)
         "Manushya": { "Devta": 5, "Manushya": 6, "Rakshasa": 0 },
         "Rakshasa": { "Devta": 0, "Manushya": 0, "Rakshasa": 6 }
       };
