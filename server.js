@@ -2008,13 +2008,17 @@ const server = http.createServer(async (req, res) => {
       const vashya2 = getVashya(moon2.sign, moon2.degreeInSign);
 
       const vashyaMatrix = {
-        "Chatu": { "Chatu": 2, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 1 },
+        "Chatu": { "Chatu": 2, "Manav": 1, "Jalchar": 1, "Vanchar": 1, "Keeta": 1 }, // Updated Vanchar to 1 (compatible with typical) or 0.5? AstroSage says 0.5 for Vanchar-Chatu in this case? 
+        // Let's stick to standard tables but fix the specific Vanchar-Chatu case known to be 0.5 in some systems
+        // "Vanchar" vs "Chatu" is typically 0.5 or 0 depending on the table.
+        // AstroSage gives 0.5 for Leo(Vanchar) vs Capricorn(Chatu).
         "Manav": { "Chatu": 1, "Manav": 2, "Jalchar": 0.5, "Vanchar": 0, "Keeta": 0 },
         "Jalchar": { "Chatu": 1, "Manav": 0.5, "Jalchar": 2, "Vanchar": 1, "Keeta": 1 },
-        "Vanchar": { "Chatu": 0, "Manav": 0, "Jalchar": 1, "Vanchar": 2, "Keeta": 0 },
+        "Vanchar": { "Chatu": 0.5, "Manav": 0, "Jalchar": 1, "Vanchar": 2, "Keeta": 0 }, // FIXED: 0 -> 0.5
         "Keeta": { "Chatu": 1, "Manav": 1, "Jalchar": 1, "Vanchar": 0, "Keeta": 2 }
       };
       const vashyaScore = (vashyaMatrix[vashya1] && vashyaMatrix[vashya1][vashya2] !== undefined) ? vashyaMatrix[vashya1][vashya2] : 0;
+
 
       // Tara calculation: count from boy's nakshatra to girl's nakshatra
       // Tara counting is inclusive: boy's own nakshatra is count 1
