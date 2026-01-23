@@ -1982,8 +1982,8 @@ const server = http.createServer(async (req, res) => {
       const count1 = ((moon2.nakshatra.index - moon1.nakshatra.index + 27) % 27) || 27;
       const count2 = ((moon1.nakshatra.index - moon2.nakshatra.index + 27) % 27) || 27;
 
-      const t1Idx = ((count1 - 1) % 9) + 1; // 1-9
-      const t2Idx = ((count2 - 1) % 9) + 1; // 1-9
+      const t1Idx = (count1 % 9) || 9; // 1-9, where 9 means Ati-Mitra
+      const t2Idx = (count2 % 9) || 9; // 1-9
 
       const taraNames = ["", "Janma", "Sampat", "Vipat", "Kshema", "Pratyari", "Sadhak", "Nidhan", "Mitra", "Ati-Mitra"];
       const tara1 = taraNames[t1Idx];
